@@ -290,7 +290,7 @@ public class FastNoise
 	{
 		m_seed = seed;
 
-		System.Random gen = new System.Random(seed);
+		Random gen = new Random(seed);
 
 		for (int i = 0; i < 256; i++)
 			m_perm[i] = (byte)i;
@@ -304,19 +304,7 @@ public class FastNoise
 			m_perm12[j] = m_perm12[j + 256] = (byte)(m_perm[j] % 12);
 		}
 	}
-
-	private byte Index2D_12(byte offset, int x, int y)
-	{
-		return m_perm12[(x & 0xff) + m_perm[(y & 0xff) + offset]];
-	}
-	private byte Index3D_12(byte offset, int x, int y, int z)
-	{
-		return m_perm12[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + offset]]];
-	}
-	private byte Index4D_32(byte offset, int x, int y, int z, int w)
-	{
-		return (byte)(m_perm[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + m_perm[(w & 0xff) + offset]]]] & 31);
-	}
+		
 	private byte Index2D_256(byte offset, int x, int y)
 	{
 		return m_perm[(x & 0xff) + m_perm[(y & 0xff) + offset]];
@@ -378,19 +366,19 @@ public class FastNoise
 
 	private float GradCoord2D(byte offset, int x, int y, float xd, float yd)
 	{
-		byte lutPos = Index2D_12(offset, x, y);
+		byte lutPos = m_perm12[(x & 0xff) + m_perm[(y & 0xff) + offset]];
 
 		return xd * GRAD_X[lutPos] + yd * GRAD_Y[lutPos];
 	}
 	private float GradCoord3D(byte offset, int x, int y, int z, float xd, float yd, float zd)
-	{
-		byte lutPos = Index3D_12(offset, x, y, z);
+	{	
+		byte lutPos = m_perm12[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + offset]]];
 
 		return xd * GRAD_X[lutPos] + yd * GRAD_Y[lutPos] + zd * GRAD_Z[lutPos];
 	}
 	private float GradCoord4D(byte offset, int x, int y, int z, int w, float xd, float yd, float zd, float wd)
 	{
-		int lutPos = Index4D_32(offset, x, y, z, w) << 2;
+		byte lutPos = (byte)(m_perm[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + m_perm[(w & 0xff) + offset]]]] & 31);
 
 		return xd * GRAD_4D[lutPos] + yd * GRAD_4D[lutPos + 1] + zd * GRAD_4D[lutPos + 2] + wd * GRAD_4D[lutPos + 3];
 	}
@@ -531,7 +519,7 @@ public class FastNoise
 	// White Noise
 	private int FloatCast2Int(float f)
 	{
-		return System.BitConverter.ToInt32(System.BitConverter.GetBytes(f), 0);
+		return BitConverter.ToInt32(BitConverter.GetBytes(f), 0);
 	}
 
 	public float GetWhiteNoise(float x, float y, float z, float w)
