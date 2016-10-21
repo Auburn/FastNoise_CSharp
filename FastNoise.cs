@@ -26,6 +26,8 @@
 // off every 'zix'.)
 //
 
+using System;
+
 public class FastNoise
 {
 	public enum NoiseType { Value, ValueFractal, Gradient, GradientFractal, Simplex, SimplexFractal, Cellular, WhiteNoise };
@@ -266,9 +268,7 @@ public class FastNoise
 	};
 
 	private static int FastFloor(float f) { return (f >= 0.0f ? (int)f : (int)f - 1); }
-	private static int FastRound(float f) { return (f >= 0.0f) ? (int)(f + 0.5f) : (int)(f - 0.5f); }
-	private static float FastAbs(float f) { return System.Math.Abs(f); }
-	private static int FastAbs(int i) { return System.Math.Abs(i); }
+	private static int FastRound(float f) { return (f >= 0.0f) ? (int)(f + 0.5f) : (int)(f - 0.5f); }	
 	private static float Lerp(float a, float b, float t) { return a + t * (b - a); }
 	private static float InterpHermiteFunc(float t) { return t * t * (3 - 2 * t); }
 	private static float InterpQuinticFunc(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }
@@ -626,7 +626,7 @@ public class FastNoise
 
 	private float SingleValueFractalBillow(float x, float y, float z)
 	{
-		float sum = FastAbs(SingleValue(m_perm[0], x, y, z)) * 2.0f - 1.0f;
+		float sum = Math.Abs(SingleValue(m_perm[0], x, y, z)) * 2.0f - 1.0f;
 		float amp = 1.0f;
 		int i = 0;
 
@@ -637,7 +637,7 @@ public class FastNoise
 			z *= m_lacunarity;
 
 			amp *= m_gain;
-			sum += (FastAbs(SingleValue(m_perm[i], x, y, z)) * 2.0f - 1.0f) * amp;
+			sum += (Math.Abs(SingleValue(m_perm[i], x, y, z)) * 2.0f - 1.0f) * amp;
 		}
 
 		return sum * m_fractalBounding;
@@ -645,7 +645,7 @@ public class FastNoise
 
 	private float SingleValueFractalRigidMulti(float x, float y, float z)
 	{
-		float sum = 1.0f - FastAbs(SingleValue(m_perm[0], x, y, z));
+		float sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y, z));
 		float amp = 1.0f;
 		int i = 0;
 
@@ -656,7 +656,7 @@ public class FastNoise
 			z *= m_lacunarity;
 
 			amp *= m_gain;
-			sum -= (1.0f - FastAbs(SingleValue(m_perm[i], x, y, z))) * amp;
+			sum -= (1.0f - Math.Abs(SingleValue(m_perm[i], x, y, z))) * amp;
 		}
 
 		return sum;
@@ -681,19 +681,19 @@ public class FastNoise
 		{
 			default:
 			case Interp.Linear:
-				xs = x - (float)x0;
-				ys = y - (float)y0;
-				zs = z - (float)z0;
+				xs = x - x0;
+				ys = y - y0;
+				zs = z - z0;
 				break;
 			case Interp.Hermite:
-				xs = InterpHermiteFunc(x - (float)x0);
-				ys = InterpHermiteFunc(y - (float)y0);
-				zs = InterpHermiteFunc(z - (float)z0);
+				xs = InterpHermiteFunc(x - x0);
+				ys = InterpHermiteFunc(y - y0);
+				zs = InterpHermiteFunc(z - z0);
 				break;
 			case Interp.Quintic:
-				xs = InterpQuinticFunc(x - (float)x0);
-				ys = InterpQuinticFunc(y - (float)y0);
-				zs = InterpQuinticFunc(z - (float)z0);
+				xs = InterpQuinticFunc(x - x0);
+				ys = InterpQuinticFunc(y - y0);
+				zs = InterpQuinticFunc(z - z0);
 				break;
 		}
 
@@ -746,7 +746,7 @@ public class FastNoise
 
 	private float SingleValueFractalBillow(float x, float y)
 	{
-		float sum = FastAbs(SingleValue(m_perm[0], x, y)) * 2.0f - 1.0f;
+		float sum = Math.Abs(SingleValue(m_perm[0], x, y)) * 2.0f - 1.0f;
 		float amp = 1.0f;
 		int i = 0;
 
@@ -755,7 +755,7 @@ public class FastNoise
 			x *= m_lacunarity;
 			y *= m_lacunarity;
 			amp *= m_gain;
-			sum += (FastAbs(SingleValue(m_perm[i], x, y)) * 2.0f - 1.0f) * amp;
+			sum += (Math.Abs(SingleValue(m_perm[i], x, y)) * 2.0f - 1.0f) * amp;
 		}
 
 		return sum * m_fractalBounding;
@@ -763,7 +763,7 @@ public class FastNoise
 
 	private float SingleValueFractalRigidMulti(float x, float y)
 	{
-		float sum = 1.0f - FastAbs(SingleValue(m_perm[0], x, y));
+		float sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y));
 		float amp = 1.0f;
 		int i = 0;
 
@@ -773,7 +773,7 @@ public class FastNoise
 			y *= m_lacunarity;
 
 			amp *= m_gain;
-			sum -= (1.0f - FastAbs(SingleValue(m_perm[i], x, y))) * amp;
+			sum -= (1.0f - Math.Abs(SingleValue(m_perm[i], x, y))) * amp;
 		}
 
 		return sum;
@@ -796,16 +796,16 @@ public class FastNoise
 		{
 			default:
 			case Interp.Linear:
-				xs = x - (float)x0;
-				ys = y - (float)y0;
+				xs = x - x0;
+				ys = y - y0;
 				break;
 			case Interp.Hermite:
-				xs = InterpHermiteFunc(x - (float)x0);
-				ys = InterpHermiteFunc(y - (float)y0);
+				xs = InterpHermiteFunc(x - x0);
+				ys = InterpHermiteFunc(y - y0);
 				break;
 			case Interp.Quintic:
-				xs = InterpQuinticFunc(x - (float)x0);
-				ys = InterpQuinticFunc(y - (float)y0);
+				xs = InterpQuinticFunc(x - x0);
+				ys = InterpQuinticFunc(y - y0);
 				break;
 		}
 
@@ -856,7 +856,7 @@ public class FastNoise
 
 	private float SingleGradientFractalBillow(float x, float y, float z)
 	{
-		float sum = FastAbs(SingleGradient(m_perm[0], x, y, z)) * 2.0f - 1.0f;
+		float sum = Math.Abs(SingleGradient(m_perm[0], x, y, z)) * 2.0f - 1.0f;
 		float amp = 1.0f;
 		int i = 0;
 
@@ -867,7 +867,7 @@ public class FastNoise
 			z *= m_lacunarity;
 
 			amp *= m_gain;
-			sum += (FastAbs(SingleGradient(m_perm[i], x, y, z)) * 2.0f - 1.0f) * amp;
+			sum += (Math.Abs(SingleGradient(m_perm[i], x, y, z)) * 2.0f - 1.0f) * amp;
 		}
 
 		return sum * m_fractalBounding;
@@ -875,7 +875,7 @@ public class FastNoise
 
 	private float SingleGradientFractalRigidMulti(float x, float y, float z)
 	{
-		float sum = 1.0f - FastAbs(SingleGradient(m_perm[0], x, y, z));
+		float sum = 1.0f - Math.Abs(SingleGradient(m_perm[0], x, y, z));
 		float amp = 1.0f;
 		int i = 0;
 
@@ -886,7 +886,7 @@ public class FastNoise
 			z *= m_lacunarity;
 
 			amp *= m_gain;
-			sum -= (1.0f - FastAbs(SingleGradient(m_perm[i], x, y, z))) * amp;
+			sum -= (1.0f - Math.Abs(SingleGradient(m_perm[i], x, y, z))) * amp;
 		}
 
 		return sum;
@@ -911,25 +911,25 @@ public class FastNoise
 		{
 			default:
 			case Interp.Linear:
-				xs = x - (float)x0;
-				ys = y - (float)y0;
-				zs = z - (float)z0;
+				xs = x - x0;
+				ys = y - y0;
+				zs = z - z0;
 				break;
 			case Interp.Hermite:
-				xs = InterpHermiteFunc(x - (float)x0);
-				ys = InterpHermiteFunc(y - (float)y0);
-				zs = InterpHermiteFunc(z - (float)z0);
+				xs = InterpHermiteFunc(x - x0);
+				ys = InterpHermiteFunc(y - y0);
+				zs = InterpHermiteFunc(z - z0);
 				break;
 			case Interp.Quintic:
-				xs = InterpQuinticFunc(x - (float)x0);
-				ys = InterpQuinticFunc(y - (float)y0);
-				zs = InterpQuinticFunc(z - (float)z0);
+				xs = InterpQuinticFunc(x - x0);
+				ys = InterpQuinticFunc(y - y0);
+				zs = InterpQuinticFunc(z - z0);
 				break;
 		}
 
-		float xd0 = x - (float)x0;
-		float yd0 = y - (float)y0;
-		float zd0 = z - (float)z0;
+		float xd0 = x - x0;
+		float yd0 = y - y0;
+		float zd0 = z - z0;
 		float xd1 = xd0 - 1.0f;
 		float yd1 = yd0 - 1.0f;
 		float zd1 = zd0 - 1.0f;
@@ -983,7 +983,7 @@ public class FastNoise
 
 	private float SingleGradientFractalBillow(float x, float y)
 	{
-		float sum = FastAbs(SingleGradient(m_perm[0], x, y)) * 2.0f - 1.0f;
+		float sum = Math.Abs(SingleGradient(m_perm[0], x, y)) * 2.0f - 1.0f;
 		float amp = 1.0f;
 		int i = 0;
 
@@ -993,7 +993,7 @@ public class FastNoise
 			y *= m_lacunarity;
 
 			amp *= m_gain;
-			sum += (FastAbs(SingleGradient(m_perm[i], x, y)) * 2.0f - 1.0f) * amp;
+			sum += (Math.Abs(SingleGradient(m_perm[i], x, y)) * 2.0f - 1.0f) * amp;
 		}
 
 		return sum * m_fractalBounding;
@@ -1001,7 +1001,7 @@ public class FastNoise
 
 	private float SingleGradientFractalRigidMulti(float x, float y)
 	{
-		float sum = 1.0f - FastAbs(SingleGradient(m_perm[0], x, y));
+		float sum = 1.0f - Math.Abs(SingleGradient(m_perm[0], x, y));
 		float amp = 1.0f;
 		int i = 0;
 
@@ -1011,7 +1011,7 @@ public class FastNoise
 			y *= m_lacunarity;
 
 			amp *= m_gain;
-			sum -= (1.0f - FastAbs(SingleGradient(m_perm[i], x, y))) * amp;
+			sum -= (1.0f - Math.Abs(SingleGradient(m_perm[i], x, y))) * amp;
 		}
 
 		return sum;
@@ -1034,21 +1034,21 @@ public class FastNoise
 		{
 			default:
 			case Interp.Linear:
-				xs = x - (float)x0;
-				ys = y - (float)y0;
+				xs = x - x0;
+				ys = y - y0;
 				break;
 			case Interp.Hermite:
-				xs = InterpHermiteFunc(x - (float)x0);
-				ys = InterpHermiteFunc(y - (float)y0);
+				xs = InterpHermiteFunc(x - x0);
+				ys = InterpHermiteFunc(y - y0);
 				break;
 			case Interp.Quintic:
-				xs = InterpQuinticFunc(x - (float)x0);
-				ys = InterpQuinticFunc(y - (float)y0);
+				xs = InterpQuinticFunc(x - x0);
+				ys = InterpQuinticFunc(y - y0);
 				break;
 		}
 
-		float xd0 = x - (float)x0;
-		float yd0 = y - (float)y0;
+		float xd0 = x - x0;
+		float yd0 = y - y0;
 		float xd1 = xd0 - 1.0f;
 		float yd1 = yd0 - 1.0f;
 
@@ -1099,7 +1099,7 @@ public class FastNoise
 
 	private float SingleSimplexFractalBillow(float x, float y, float z)
 	{
-		float sum = FastAbs(SingleSimplex(m_perm[0], x, y, z)) * 2.0f - 1.0f;
+		float sum = Math.Abs(SingleSimplex(m_perm[0], x, y, z)) * 2.0f - 1.0f;
 		float amp = 1.0f;
 		int i = 0;
 
@@ -1110,7 +1110,7 @@ public class FastNoise
 			z *= m_lacunarity;
 
 			amp *= m_gain;
-			sum += (FastAbs(SingleSimplex(m_perm[i], x, y, z)) * 2.0f - 1.0f) * amp;
+			sum += (Math.Abs(SingleSimplex(m_perm[i], x, y, z)) * 2.0f - 1.0f) * amp;
 		}
 
 		return sum * m_fractalBounding;
@@ -1118,7 +1118,7 @@ public class FastNoise
 
 	private float SingleSimplexFractalRigidMulti(float x, float y, float z)
 	{
-		float sum = 1.0f - FastAbs(SingleSimplex(m_perm[0], x, y, z));
+		float sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y, z));
 		float amp = 1.0f;
 		int i = 0;
 
@@ -1129,7 +1129,7 @@ public class FastNoise
 			z *= m_lacunarity;
 
 			amp *= m_gain;
-			sum -= (1.0f - FastAbs(SingleSimplex(m_perm[i], x, y, z))) * amp;
+			sum -= (1.0f - Math.Abs(SingleSimplex(m_perm[i], x, y, z))) * amp;
 		}
 
 		return sum;
@@ -1278,7 +1278,7 @@ public class FastNoise
 
 	private float SingleSimplexFractalBillow(float x, float y)
 	{
-		float sum = FastAbs(SingleSimplex(m_perm[0], x, y)) * 2.0f - 1.0f;
+		float sum = Math.Abs(SingleSimplex(m_perm[0], x, y)) * 2.0f - 1.0f;
 		float amp = 1.0f;
 		int i = 0;
 
@@ -1288,7 +1288,7 @@ public class FastNoise
 			y *= m_lacunarity;
 
 			amp *= m_gain;
-			sum += (FastAbs(SingleSimplex(m_perm[i], x, y)) * 2.0f - 1.0f) * amp;
+			sum += (Math.Abs(SingleSimplex(m_perm[i], x, y)) * 2.0f - 1.0f) * amp;
 		}
 
 		return sum * m_fractalBounding;
@@ -1296,7 +1296,7 @@ public class FastNoise
 
 	private float SingleSimplexFractalRigidMulti(float x, float y)
 	{
-		float sum = 1.0f - FastAbs(SingleSimplex(m_perm[0], x, y));
+		float sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y));
 		float amp = 1.0f;
 		int i = 0;
 
@@ -1306,7 +1306,7 @@ public class FastNoise
 			y *= m_lacunarity;
 
 			amp *= m_gain;
-			sum -= (1.0f - FastAbs(SingleSimplex(m_perm[i], x, y))) * amp;
+			sum -= (1.0f - Math.Abs(SingleSimplex(m_perm[i], x, y))) * amp;
 		}
 
 		return sum;
@@ -1343,8 +1343,8 @@ public class FastNoise
 			i1 = 0; j1 = 1;
 		}
 
-		float x1 = x0 - (float)i1 + G2;
-		float y1 = y0 - (float)j1 + G2;
+		float x1 = x0 - i1 + G2;
+		float y1 = y0 - j1 + G2;
 		float x2 = x0 - 1.0f + 2.0f * G2;
 		float y2 = y0 - 1.0f + 2.0f * G2;
 
@@ -1560,7 +1560,7 @@ public class FastNoise
 							float vecY = yi - y + CELL_3D_Y[lutPos];
 							float vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ);
+							float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
 
 							if (newDistance < distance)
 							{
@@ -1586,7 +1586,7 @@ public class FastNoise
 							float vecY = yi - y + CELL_3D_Y[lutPos];
 							float vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = (FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+							float newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
 							if (newDistance < distance)
 							{
@@ -1643,8 +1643,8 @@ public class FastNoise
 
 							float newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
 
-							distance2 = System.Math.Max(System.Math.Min(distance2, newDistance), distance);
-							distance = System.Math.Min(distance, newDistance);
+							distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
+							distance = Math.Min(distance, newDistance);
 						}
 					}
 				}
@@ -1662,10 +1662,10 @@ public class FastNoise
 							float vecY = yi - y + CELL_3D_Y[lutPos];
 							float vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ);
+							float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
 
-							distance2 = System.Math.Max(System.Math.Min(distance2, newDistance), distance);
-							distance = System.Math.Min(distance, newDistance);
+							distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
+							distance = Math.Min(distance, newDistance);
 						}
 					}
 				}
@@ -1683,10 +1683,10 @@ public class FastNoise
 							float vecY = yi - y + CELL_3D_Y[lutPos];
 							float vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = (FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+							float newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
-							distance2 = System.Math.Max(System.Math.Min(distance2, newDistance), distance);
-							distance = System.Math.Min(distance, newDistance);
+							distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
+							distance = Math.Min(distance, newDistance);
 						}
 					}
 				}
@@ -1770,7 +1770,7 @@ public class FastNoise
 						float vecX = xi - x + CELL_2D_X[lutPos];
 						float vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = (FastAbs(vecX) + FastAbs(vecY));
+						float newDistance = (Math.Abs(vecX) + Math.Abs(vecY));
 
 						if (newDistance < distance)
 						{
@@ -1791,7 +1791,7 @@ public class FastNoise
 						float vecX = xi - x + CELL_2D_X[lutPos];
 						float vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = (FastAbs(vecX) + FastAbs(vecY)) + (vecX * vecX + vecY * vecY);
+						float newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
 
 						if (newDistance < distance)
 						{
@@ -1843,8 +1843,8 @@ public class FastNoise
 
 						float newDistance = vecX * vecX + vecY * vecY;
 
-						distance2 = System.Math.Max(System.Math.Min(distance2, newDistance), distance);
-						distance = System.Math.Min(distance, newDistance);
+						distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
+						distance = Math.Min(distance, newDistance);
 					}
 				}
 				break;
@@ -1858,10 +1858,10 @@ public class FastNoise
 						float vecX = xi - x + CELL_2D_X[lutPos];
 						float vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = FastAbs(vecX) + FastAbs(vecY);
+						float newDistance = Math.Abs(vecX) + Math.Abs(vecY);
 
-						distance2 = System.Math.Max(System.Math.Min(distance2, newDistance), distance);
-						distance = System.Math.Min(distance, newDistance);
+						distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
+						distance = Math.Min(distance, newDistance);
 					}
 				}
 				break;
@@ -1875,10 +1875,10 @@ public class FastNoise
 						float vecX = xi - x + CELL_2D_X[lutPos];
 						float vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = (FastAbs(vecX) + FastAbs(vecY)) + (vecX * vecX + vecY * vecY);
+						float newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
 
-						distance2 = System.Math.Max(System.Math.Min(distance2, newDistance), distance);
-						distance = System.Math.Min(distance, newDistance);
+						distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
+						distance = Math.Min(distance, newDistance);
 					}
 				}
 				break;
@@ -1940,19 +1940,19 @@ public class FastNoise
 		{
 			default:
 			case Interp.Linear:
-				xs = xf - (float)x0;
-				ys = yf - (float)y0;
-				zs = zf - (float)z0;
+				xs = xf - x0;
+				ys = yf - y0;
+				zs = zf - z0;
 				break;
 			case Interp.Hermite:
-				xs = InterpHermiteFunc(xf - (float)x0);
-				ys = InterpHermiteFunc(yf - (float)y0);
-				zs = InterpHermiteFunc(zf - (float)z0);
+				xs = InterpHermiteFunc(xf - x0);
+				ys = InterpHermiteFunc(yf - y0);
+				zs = InterpHermiteFunc(zf - z0);
 				break;
 			case Interp.Quintic:
-				xs = InterpQuinticFunc(xf - (float)x0);
-				ys = InterpQuinticFunc(yf - (float)y0);
-				zs = InterpQuinticFunc(zf - (float)z0);
+				xs = InterpQuinticFunc(xf - x0);
+				ys = InterpQuinticFunc(yf - y0);
+				zs = InterpQuinticFunc(zf - z0);
 				break;
 		}
 
@@ -2029,16 +2029,16 @@ public class FastNoise
 		{
 			default:
 			case Interp.Linear:
-				xs = xf - (float)x0;
-				ys = yf - (float)y0;
+				xs = xf - x0;
+				ys = yf - y0;
 				break;
 			case Interp.Hermite:
-				xs = InterpHermiteFunc(xf - (float)x0);
-				ys = InterpHermiteFunc(yf - (float)y0);
+				xs = InterpHermiteFunc(xf - x0);
+				ys = InterpHermiteFunc(yf - y0);
 				break;
 			case Interp.Quintic:
-				xs = InterpQuinticFunc(xf - (float)x0);
-				ys = InterpQuinticFunc(yf - (float)y0);
+				xs = InterpQuinticFunc(xf - x0);
+				ys = InterpQuinticFunc(yf - y0);
 				break;
 		}
 
