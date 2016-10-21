@@ -597,9 +597,8 @@ public class FastNoise
 	{
 		float sum = SingleValue(m_perm[0], x, y, z);
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -615,10 +614,9 @@ public class FastNoise
 	private float SingleValueFractalBillow(float x, float y, float z)
 	{
 		float sum = Math.Abs(SingleValue(m_perm[0], x, y, z)) * 2.0f - 1.0f;
-		float amp = 1.0f;
-		int i = 0;
+		float amp = 1.0f;		
 
-		while (++i < m_octaves)
+		for(int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -635,9 +633,8 @@ public class FastNoise
 	{
 		float sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y, z));
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -717,10 +714,9 @@ public class FastNoise
 	private float SingleValueFractalFBM(float x, float y)
 	{
 		float sum = SingleValue(m_perm[0], x, y);
-		float amp = 1.0f;
-		int i = 0;
+		float amp = 1.0f;		
 
-		while (++i < m_octaves)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -735,10 +731,9 @@ public class FastNoise
 	private float SingleValueFractalBillow(float x, float y)
 	{
 		float sum = Math.Abs(SingleValue(m_perm[0], x, y)) * 2.0f - 1.0f;
-		float amp = 1.0f;
-		int i = 0;
+		float amp = 1.0f;		
 
-		while (++i < m_octaves)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -752,10 +747,9 @@ public class FastNoise
 	private float SingleValueFractalRigidMulti(float x, float y)
 	{
 		float sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y));
-		float amp = 1.0f;
-		int i = 0;
+		float amp = 1.0f;		
 
-		while (++i < m_octaves)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -827,9 +821,8 @@ public class FastNoise
 	{
 		float sum = SingleGradient(m_perm[0], x, y, z);
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves;i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -846,9 +839,8 @@ public class FastNoise
 	{
 		float sum = Math.Abs(SingleGradient(m_perm[0], x, y, z)) * 2.0f - 1.0f;
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -865,9 +857,8 @@ public class FastNoise
 	{
 		float sum = 1.0f - Math.Abs(SingleGradient(m_perm[0], x, y, z));
 		float amp = 1.0f;
-		int i = 0;
 
-		while (++i < m_octaves)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -926,7 +917,7 @@ public class FastNoise
 		float xf10 = Lerp(GradCoord3D(offset, x0, y1, z0, xd0, yd1, zd0), GradCoord3D(offset, x1, y1, z0, xd1, yd1, zd0), xs);
 		float xf01 = Lerp(GradCoord3D(offset, x0, y0, z1, xd0, yd0, zd1), GradCoord3D(offset, x1, y0, z1, xd1, yd0, zd1), xs);
 		float xf11 = Lerp(GradCoord3D(offset, x0, y1, z1, xd0, yd1, zd1), GradCoord3D(offset, x1, y1, z1, xd1, yd1, zd1), xs);
-
+		
 		float yf0 = Lerp(xf00, xf10, ys);
 		float yf1 = Lerp(xf01, xf11, ys);
 
@@ -955,9 +946,8 @@ public class FastNoise
 	{
 		float sum = SingleGradient(m_perm[0], x, y);
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -973,9 +963,8 @@ public class FastNoise
 	{
 		float sum = Math.Abs(SingleGradient(m_perm[0], x, y)) * 2.0f - 1.0f;
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -990,10 +979,9 @@ public class FastNoise
 	private float SingleGradientFractalRigidMulti(float x, float y)
 	{
 		float sum = 1.0f - Math.Abs(SingleGradient(m_perm[0], x, y));
-		float amp = 1.0f;
-		int i = 0;
+		float amp = 1.0f;		
 
-		while (++i < m_octaves)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -1070,9 +1058,8 @@ public class FastNoise
 	{
 		float sum = SingleSimplex(m_perm[0], x, y, z);
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -1088,10 +1075,9 @@ public class FastNoise
 	private float SingleSimplexFractalBillow(float x, float y, float z)
 	{
 		float sum = Math.Abs(SingleSimplex(m_perm[0], x, y, z)) * 2.0f - 1.0f;
-		float amp = 1.0f;
-		int i = 0;
+		float amp = 1.0f;		
 
-		while (++i < m_octaves)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -1108,9 +1094,8 @@ public class FastNoise
 	{
 		float sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y, z));
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -1250,9 +1235,8 @@ public class FastNoise
 	{
 		float sum = SingleSimplex(m_perm[0], x, y);
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -1267,10 +1251,9 @@ public class FastNoise
 	private float SingleSimplexFractalBillow(float x, float y)
 	{
 		float sum = Math.Abs(SingleSimplex(m_perm[0], x, y)) * 2.0f - 1.0f;
-		float amp = 1.0f;
-		int i = 0;
+		float amp = 1.0f;		
 
-		while (++i < m_octaves)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -1286,9 +1269,8 @@ public class FastNoise
 	{
 		float sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y));
 		float amp = 1.0f;
-		int i = 0;
-
-		while (++i < m_octaves)
+		
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -1897,12 +1879,11 @@ public class FastNoise
 	public void PositionWarpFractal(ref float x, ref float y, ref float z)
 	{
 		float amp = m_positionWarpAmp * m_fractalBounding;
-		float freq = m_frequency;
-		int i = 0;
+		float freq = m_frequency;		
 
 		SinglePositionWarp(m_perm[0], amp, m_frequency, ref x, ref y, ref z);
 
-		while (++i < m_octaves)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			freq *= m_lacunarity;
 			amp *= m_gain;
@@ -1989,12 +1970,11 @@ public class FastNoise
 	public void PositionWarpFractal(ref float x, ref float y)
 	{
 		float amp = m_positionWarpAmp * m_fractalBounding;
-		float freq = m_frequency;
-		int i = 0;
+		float freq = m_frequency;		
 
 		SinglePositionWarp(m_perm[0], amp, m_frequency, ref x, ref y);
 
-		while (++i < m_octaves)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			freq *= m_lacunarity;
 			amp *= m_gain;
