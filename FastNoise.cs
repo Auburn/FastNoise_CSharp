@@ -27,6 +27,7 @@
 //
 
 using System;
+using System.Runtime.CompilerServices;
 
 public class FastNoise
 {
@@ -267,10 +268,25 @@ public class FastNoise
 		-0.2334146693f, -0.2712420987f, -0.2523278991f, -0.3144428146f, -0.2497981362f, 0.3130537363f, -0.1693876312f, -0.1443188342f, 0.2756962409f, -0.3029914042f, 0.4375151083f, 0.08105160988f, -0.4274764309f, -0.1231199324f, -0.4021797064f, -0.1251477955f,
 	};
 
+#if UNITY_5
+	private const short methodImplOption = 0;
+#else
+	private const MethodImplOptions methodImplOption = MethodImplOptions.AggressiveInlining;
+#endif
+
+	[MethodImpl(methodImplOption)]
 	private static int FastFloor(float f) { return (f >= 0.0f ? (int)f : (int)f - 1); }
-	private static int FastRound(float f) { return (f >= 0.0f) ? (int)(f + 0.5f) : (int)(f - 0.5f); }	
+
+	[MethodImpl(methodImplOption)]
+	private static int FastRound(float f) { return (f >= 0.0f) ? (int)(f + 0.5f) : (int)(f - 0.5f); }
+
+	[MethodImpl(methodImplOption)]
 	private static float Lerp(float a, float b, float t) { return a + t * (b - a); }
+
+	[MethodImpl(methodImplOption)]
 	private static float InterpHermiteFunc(float t) { return t * t * (3 - 2 * t); }
+
+	[MethodImpl(methodImplOption)]
 	private static float InterpQuinticFunc(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }
 
 	private void CalculateFractalBounding()
@@ -304,15 +320,20 @@ public class FastNoise
 			m_perm12[j] = m_perm12[j + 256] = (byte)(m_perm[j] % 12);
 		}
 	}
-		
+
+	[MethodImpl(methodImplOption)]
 	private byte Index2D_256(byte offset, int x, int y)
 	{
 		return m_perm[(x & 0xff) + m_perm[(y & 0xff) + offset]];
 	}
+
+	[MethodImpl(methodImplOption)]
 	private byte Index3D_256(byte offset, int x, int y, int z)
 	{
 		return m_perm[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + offset]]];
 	}
+
+	[MethodImpl(methodImplOption)]
 	private byte Index4D_256(byte offset, int x, int y, int z, int w)
 	{
 		return m_perm[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + m_perm[(w & 0xff) + offset]]]];
@@ -324,6 +345,7 @@ public class FastNoise
 	private const int Z_PRIME = 6971;
 	private const int W_PRIME = 1013;
 
+	[MethodImpl(methodImplOption)]
 	static float ValCoord2D(int seed, int x, int y)
 	{
 		int n = X_PRIME * x;
@@ -333,6 +355,8 @@ public class FastNoise
 		n = (n >> 13) ^ n;
 		return 9.311924889611565e-10f * (((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff) - 1073891824);
 	}
+
+	[MethodImpl(methodImplOption)]
 	static float ValCoord3D(int seed, int x, int y, int z)
 	{
 		int n = X_PRIME * x;
@@ -343,6 +367,8 @@ public class FastNoise
 		n = (n >> 13) ^ n;
 		return 9.311924889611565e-10f * (((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff) - 1073891824);
 	}
+
+	[MethodImpl(methodImplOption)]
 	static float ValCoord4D(int seed, int x, int y, int z, int w)
 	{
 		int n = X_PRIME * x;
@@ -355,27 +381,35 @@ public class FastNoise
 		return 9.311924889611565e-10f * (((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff) - 1073891824);
 	}
 
+	[MethodImpl(methodImplOption)]
 	private float ValCoord2DFast(byte offset, int x, int y)
 	{
 		return VAL_LUT[Index2D_256(offset, x, y)];
 	}
+
+	[MethodImpl(methodImplOption)]
 	private float ValCoord3DFast(byte offset, int x, int y, int z)
 	{
 		return VAL_LUT[Index3D_256(offset, x, y, z)];
 	}
 
+	[MethodImpl(methodImplOption)]
 	private float GradCoord2D(byte offset, int x, int y, float xd, float yd)
 	{
 		byte lutPos = m_perm12[(x & 0xff) + m_perm[(y & 0xff) + offset]];
 
 		return xd * GRAD_X[lutPos] + yd * GRAD_Y[lutPos];
 	}
+
+	[MethodImpl(methodImplOption)]
 	private float GradCoord3D(byte offset, int x, int y, int z, float xd, float yd, float zd)
-	{	
+	{
 		byte lutPos = m_perm12[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + offset]]];
 
 		return xd * GRAD_X[lutPos] + yd * GRAD_Y[lutPos] + zd * GRAD_Z[lutPos];
 	}
+
+	[MethodImpl(methodImplOption)]
 	private float GradCoord4D(byte offset, int x, int y, int z, int w, float xd, float yd, float zd, float wd)
 	{
 		byte lutPos = (byte)(m_perm[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + m_perm[(w & 0xff) + offset]]]] & 31);
@@ -597,7 +631,7 @@ public class FastNoise
 	{
 		float sum = SingleValue(m_perm[0], x, y, z);
 		float amp = 1.0f;
-		
+
 		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
@@ -614,9 +648,9 @@ public class FastNoise
 	private float SingleValueFractalBillow(float x, float y, float z)
 	{
 		float sum = Math.Abs(SingleValue(m_perm[0], x, y, z)) * 2.0f - 1.0f;
-		float amp = 1.0f;		
+		float amp = 1.0f;
 
-		for(int i = 1; i < m_octaves; i++)
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -633,7 +667,7 @@ public class FastNoise
 	{
 		float sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y, z));
 		float amp = 1.0f;
-		
+
 		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
@@ -714,7 +748,7 @@ public class FastNoise
 	private float SingleValueFractalFBM(float x, float y)
 	{
 		float sum = SingleValue(m_perm[0], x, y);
-		float amp = 1.0f;		
+		float amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -731,7 +765,7 @@ public class FastNoise
 	private float SingleValueFractalBillow(float x, float y)
 	{
 		float sum = Math.Abs(SingleValue(m_perm[0], x, y)) * 2.0f - 1.0f;
-		float amp = 1.0f;		
+		float amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -747,7 +781,7 @@ public class FastNoise
 	private float SingleValueFractalRigidMulti(float x, float y)
 	{
 		float sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y));
-		float amp = 1.0f;		
+		float amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -821,8 +855,8 @@ public class FastNoise
 	{
 		float sum = SingleGradient(m_perm[0], x, y, z);
 		float amp = 1.0f;
-		
-		for (int i = 1; i < m_octaves;i++)
+
+		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
 			y *= m_lacunarity;
@@ -839,7 +873,7 @@ public class FastNoise
 	{
 		float sum = Math.Abs(SingleGradient(m_perm[0], x, y, z)) * 2.0f - 1.0f;
 		float amp = 1.0f;
-		
+
 		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
@@ -917,7 +951,7 @@ public class FastNoise
 		float xf10 = Lerp(GradCoord3D(offset, x0, y1, z0, xd0, yd1, zd0), GradCoord3D(offset, x1, y1, z0, xd1, yd1, zd0), xs);
 		float xf01 = Lerp(GradCoord3D(offset, x0, y0, z1, xd0, yd0, zd1), GradCoord3D(offset, x1, y0, z1, xd1, yd0, zd1), xs);
 		float xf11 = Lerp(GradCoord3D(offset, x0, y1, z1, xd0, yd1, zd1), GradCoord3D(offset, x1, y1, z1, xd1, yd1, zd1), xs);
-		
+
 		float yf0 = Lerp(xf00, xf10, ys);
 		float yf1 = Lerp(xf01, xf11, ys);
 
@@ -946,7 +980,7 @@ public class FastNoise
 	{
 		float sum = SingleGradient(m_perm[0], x, y);
 		float amp = 1.0f;
-		
+
 		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
@@ -963,7 +997,7 @@ public class FastNoise
 	{
 		float sum = Math.Abs(SingleGradient(m_perm[0], x, y)) * 2.0f - 1.0f;
 		float amp = 1.0f;
-		
+
 		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
@@ -979,7 +1013,7 @@ public class FastNoise
 	private float SingleGradientFractalRigidMulti(float x, float y)
 	{
 		float sum = 1.0f - Math.Abs(SingleGradient(m_perm[0], x, y));
-		float amp = 1.0f;		
+		float amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1058,7 +1092,7 @@ public class FastNoise
 	{
 		float sum = SingleSimplex(m_perm[0], x, y, z);
 		float amp = 1.0f;
-		
+
 		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
@@ -1075,7 +1109,7 @@ public class FastNoise
 	private float SingleSimplexFractalBillow(float x, float y, float z)
 	{
 		float sum = Math.Abs(SingleSimplex(m_perm[0], x, y, z)) * 2.0f - 1.0f;
-		float amp = 1.0f;		
+		float amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1094,7 +1128,7 @@ public class FastNoise
 	{
 		float sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y, z));
 		float amp = 1.0f;
-		
+
 		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
@@ -1235,7 +1269,7 @@ public class FastNoise
 	{
 		float sum = SingleSimplex(m_perm[0], x, y);
 		float amp = 1.0f;
-		
+
 		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
@@ -1251,7 +1285,7 @@ public class FastNoise
 	private float SingleSimplexFractalBillow(float x, float y)
 	{
 		float sum = Math.Abs(SingleSimplex(m_perm[0], x, y)) * 2.0f - 1.0f;
-		float amp = 1.0f;		
+		float amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1269,7 +1303,7 @@ public class FastNoise
 	{
 		float sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y));
 		float amp = 1.0f;
-		
+
 		for (int i = 1; i < m_octaves; i++)
 		{
 			x *= m_lacunarity;
@@ -1879,7 +1913,7 @@ public class FastNoise
 	public void PositionWarpFractal(ref float x, ref float y, ref float z)
 	{
 		float amp = m_positionWarpAmp * m_fractalBounding;
-		float freq = m_frequency;		
+		float freq = m_frequency;
 
 		SinglePositionWarp(m_perm[0], amp, m_frequency, ref x, ref y, ref z);
 
@@ -1970,7 +2004,7 @@ public class FastNoise
 	public void PositionWarpFractal(ref float x, ref float y)
 	{
 		float amp = m_positionWarpAmp * m_fractalBounding;
-		float freq = m_frequency;		
+		float freq = m_frequency;
 
 		SinglePositionWarp(m_perm[0], amp, m_frequency, ref x, ref y);
 
