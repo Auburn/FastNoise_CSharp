@@ -26,6 +26,26 @@
 // off every 'zix'.)
 //
 
+// COMPILE SETTINGS
+
+// Uncomment the line below to swap all the inputs/outputs of FastNoise to doubles instead of floats
+//#define FN_USE_DOUBLES
+
+// Uncomment the line below to disable the method aggressive inlining attribute, do this if it is unsupported, ie Unity
+//#define FN_DISABLE_AGGRESSIVE_INLINING
+
+// ----------------
+
+#if UNITY_5
+#define FN_DISABLE_AGGRESSIVE_INLINING
+#endif
+
+#if FN_USE_DOUBLES
+using FN_DECIMAL = System.Double;
+#else
+using FN_DECIMAL = System.Single;
+#endif
+
 using System;
 using System.Runtime.CompilerServices;
 
@@ -41,22 +61,22 @@ public class FastNoise
 	private readonly byte[] m_perm12 = new byte[512];
 
 	private int m_seed = 1337;
-	private float m_frequency = 0.01f;
+	private FN_DECIMAL m_frequency = 0.01f;
 	private Interp m_interp = Interp.Quintic;
 	private NoiseType m_noiseType = NoiseType.Simplex;
 
 	private int m_octaves = 3;
-	private float m_lacunarity = 2.0f;
-	private float m_gain = 0.5f;
+	private FN_DECIMAL m_lacunarity = 2.0f;
+	private FN_DECIMAL m_gain = 0.5f;
 	private FractalType m_fractalType = FractalType.FBM;
 
-	private float m_fractalBounding;
+	private FN_DECIMAL m_fractalBounding;
 
 	private CellularDistanceFunction m_cellularDistanceFunction = CellularDistanceFunction.Euclidean;
 	private CellularReturnType m_cellularReturnType = CellularReturnType.CellValue;
 	private FastNoise m_cellularNoiseLookup = null;
 
-	private float m_positionWarpAmp = 1.0f / 0.45f;
+	private FN_DECIMAL m_positionWarpAmp = 1.0f / 0.45f;
 
 	public FastNoise(int seed = 1337)
 	{
@@ -73,7 +93,7 @@ public class FastNoise
 
 	// Sets frequency for all noise types
 	// Default: 0.01
-	public void SetFrequency(float frequency) { m_frequency = frequency; }
+	public void SetFrequency(FN_DECIMAL frequency) { m_frequency = frequency; }
 
 	// Changes the interpolation method used to smooth between noise values
 	// Possible interpolation methods (lowest to highest quality) :
@@ -94,11 +114,11 @@ public class FastNoise
 
 	// Sets octave lacunarity for all fractal noise types
 	// Default: 2.0
-	public void SetFractalLacunarity(float lacunarity) { m_lacunarity = lacunarity; }
+	public void SetFractalLacunarity(FN_DECIMAL lacunarity) { m_lacunarity = lacunarity; }
 
 	// Sets octave gain for all fractal noise types
 	// Default: 0.5
-	public void SetFractalGain(float gain) { m_gain = gain; CalculateFractalBounding(); }
+	public void SetFractalGain(FN_DECIMAL gain) { m_gain = gain; CalculateFractalBounding(); }
 
 	// Sets method for combining octaves in all fractal noise types
 	// Default: FBM
@@ -119,28 +139,28 @@ public class FastNoise
 
 	// Sets the maximum warp distance from original location when using PositionWarp{Fractal}(...)
 	// Default: 1.0
-	public void SetPositionWarpAmp(float positionWarpAmp) { m_positionWarpAmp = positionWarpAmp / 0.45f; }
+	public void SetPositionWarpAmp(FN_DECIMAL positionWarpAmp) { m_positionWarpAmp = positionWarpAmp / 0.45f; }
 
-	private static readonly float[] GRAD_X =
+	private static readonly FN_DECIMAL[] GRAD_X =
 	{
 		1, -1, 1, -1,
 		1, -1, 1, -1,
 		0, 0, 0, 0
 	};
-	private static readonly float[] GRAD_Y =
+	private static readonly FN_DECIMAL[] GRAD_Y =
 	{
 		1, 1, -1, -1,
 		0, 0, 0, 0,
 		1, -1, 1, -1
 	};
-	private static readonly float[] GRAD_Z =
+	private static readonly FN_DECIMAL[] GRAD_Z =
 	{
 		0, 0, 0, 0,
 		1, 1, -1, -1,
 		1, 1, -1, -1
 	};
 
-	private static readonly float[] GRAD_4D =
+	private static readonly FN_DECIMAL[] GRAD_4D =
 	{
 		0,1,1,1,0,1,1,-1,0,1,-1,1,0,1,-1,-1,
 		0,-1,1,1,0,-1,1,-1,0,-1,-1,1,0,-1,-1,-1,
@@ -152,7 +172,7 @@ public class FastNoise
 		-1,1,1,0,-1,1,-1,0,-1,-1,1,0,-1,-1,-1,0
 	};
 
-	private static readonly float[] VAL_LUT =
+	private static readonly FN_DECIMAL[] VAL_LUT =
 	{
 		0.3490196078f, 0.4352941176f, -0.4509803922f, 0.6392156863f, 0.5843137255f, -0.1215686275f, 0.7176470588f, -0.1058823529f, 0.3960784314f, 0.0431372549f, -0.03529411765f, 0.3176470588f, 0.7254901961f, 0.137254902f, 0.8588235294f, -0.8196078431f,
 		-0.7960784314f, -0.3333333333f, -0.6705882353f, -0.3882352941f, 0.262745098f, 0.3254901961f, -0.6470588235f, -0.9215686275f, -0.5294117647f, 0.5294117647f, -0.4666666667f, 0.8117647059f, 0.3803921569f, 0.662745098f, 0.03529411765f, -0.6156862745f,
@@ -172,7 +192,7 @@ public class FastNoise
 		0.3333333333f, -0.8431372549f, 0.2235294118f, -0.3490196078f, -0.6941176471f, 0.8823529412f, 0.4745098039f, 0.4666666667f, -0.7411764706f, -0.2705882353f, 0.968627451f, 0.8196078431f, -0.662745098f, -0.4352941176f, -0.8666666667f, -0.1529411765f,
 	};
 
-	private static readonly float[] CELL_2D_X =
+	private static readonly FN_DECIMAL[] CELL_2D_X =
 	{
 		-0.4313539279f, -0.1733316799f, -0.2821957395f, -0.2806473808f, 0.3125508975f, 0.3383018443f, -0.4393982022f, -0.4460443703f, -0.302223039f, -0.212681052f, -0.2991156529f, 0.2293323691f, 0.4475439151f, 0.1777518f, 0.1688522499f, -0.0976597166f,
 		0.08450188373f, -0.4098760448f, 0.3476585782f, -0.3350670039f, 0.2298190031f, -0.01069924099f, -0.4460141246f, 0.3650293864f, -0.349479423f, -0.4122720642f, -0.267327811f, 0.322124041f, 0.2880445931f, 0.3892170926f, 0.4492085018f, -0.4497724772f,
@@ -191,7 +211,7 @@ public class FastNoise
 		-0.106833179f, 0.06440260376f, -0.4483230967f, -0.421377757f, 0.05097920662f, 0.2050584153f, 0.4178098529f, -0.3565189504f, 0.4478398129f, -0.3399999602f, 0.3767121994f, -0.3138934434f, -0.1462001792f, 0.3970290489f, 0.4459149305f, -0.4104889426f,
 		0.1475103971f, 0.09258030352f, -0.1589664637f, 0.2482445008f, 0.4383624232f, 0.06242802956f, 0.2846591015f, -0.344202744f, 0.1198188883f, -0.243590703f, 0.2958191174f, -0.1164007991f, 0.1274037151f, 0.368047306f, 0.2451436949f, -0.4314509715f,
 	};
-	private static readonly float[] CELL_2D_Y =
+	private static readonly FN_DECIMAL[] CELL_2D_Y =
 	{
 		0.1281943404f, 0.415278375f, -0.3505218461f, 0.3517627718f, -0.3237467165f, -0.2967353402f, -0.09710417025f, -0.05953502905f, 0.3334085102f, -0.3965687458f, 0.3361990872f, 0.3871778202f, -0.04695150755f, 0.41340573f, -0.4171197882f, 0.4392750616f,
 		0.4419948321f, -0.1857461384f, -0.2857157906f, -0.30038326f, -0.3868891648f, 0.449872789f, -0.05976119672f, 0.2631606867f, 0.2834856838f, 0.1803655873f, 0.3619887311f, -0.3142230135f, -0.3457315612f, -0.2258540565f, -0.02667811596f, 0.01430799601f,
@@ -210,7 +230,7 @@ public class FastNoise
 		0.4371346153f, -0.4453676062f, 0.03881238203f, -0.1579265206f, -0.4471030312f, -0.4005634111f, -0.167137449f, -0.2745801121f, 0.04403977727f, -0.2947881053f, 0.2461461331f, 0.3224451987f, -0.4255884251f, -0.2118205239f, -0.06049689889f, -0.1843877112f,
 		-0.4251360756f, 0.4403735771f, -0.4209865359f, 0.3753327428f, -0.1016778537f, 0.4456486745f, -0.3485243118f, -0.2898697484f, -0.4337550392f, 0.3783696201f, -0.3391033025f, 0.4346847754f, -0.4315881062f, 0.2589231171f, 0.3773652989f, 0.12786735f,
 	};
-	private static readonly float[] CELL_3D_X =
+	private static readonly FN_DECIMAL[] CELL_3D_X =
 	{
 		0.1453787434f, -0.01242829687f, 0.2877979582f, -0.07732986802f, 0.1107205875f, 0.2755209141f, 0.294168941f, 0.4000921098f, -0.1697304074f, -0.1483224484f, 0.2623596946f, -0.2709003183f, -0.03516550699f, -0.1267712655f, 0.02952021915f, -0.2806854217f,
 		-0.171159547f, 0.2113227183f, -0.1024352839f, -0.3304249877f, 0.2091111325f, 0.344678154f, 0.1984478035f, -0.2929008603f, -0.1617332831f, -0.3582060271f, -0.1852067326f, 0.3046301062f, -0.03816768434f, -0.4084952196f, -0.02687443361f, -0.03801098351f,
@@ -229,7 +249,7 @@ public class FastNoise
 		-0.08717822568f, -0.2149678299f, -0.2687330705f, 0.2105665099f, 0.4361845915f, 0.05333333359f, -0.05986216652f, 0.3664988455f, -0.2341015558f, -0.04730947785f, -0.2391566239f, -0.1242081035f, 0.2614832715f, -0.2728794681f, 0.007892900508f, -0.01730330376f,
 		0.2054835762f, -0.3231994983f, -0.2669545963f, -0.05554372779f, -0.2083935713f, 0.06989323478f, 0.3847566193f, -0.3026215288f, 0.3450735512f, 0.1814473292f, -0.03855010448f, 0.3533670318f, -0.007945601311f, 0.4063099273f, -0.2016773589f, -0.07527055435f,
 	};
-	private static readonly float[] CELL_3D_Y =
+	private static readonly FN_DECIMAL[] CELL_3D_Y =
 	{
 		-0.4149781685f, -0.1457918398f, -0.02606483451f, 0.2377094325f, -0.3552302079f, 0.2640521179f, 0.1526064594f, -0.2034056362f, 0.3970864695f, -0.3859694688f, -0.2354852944f, 0.3505271138f, 0.3885234328f, 0.1920044036f, 0.4409685861f, -0.266996757f,
 		0.2141185563f, 0.3902405947f, 0.2128044156f, -0.1566986703f, 0.3133278055f, -0.1944240454f, -0.3214342325f, 0.2262915116f, 0.006314769776f, -0.148303178f, -0.3454119342f, 0.1026310383f, -0.2551766358f, 0.1805950793f, -0.2749741471f, 0.3277859044f,
@@ -248,7 +268,7 @@ public class FastNoise
 		-0.3909896417f, 0.3939973956f, 0.322686276f, -0.1961317136f, -0.1105517485f, -0.313639498f, 0.1361029153f, 0.2550543014f, -0.182405731f, -0.4222150243f, -0.2577696514f, 0.4256953395f, -0.3650179274f, -0.3499628774f, -0.1672771315f, 0.2978486637f,
 		-0.3252600376f, 0.1564282844f, 0.2599343665f, 0.3170813944f, -0.310922837f, -0.3156141536f, -0.1605309138f, -0.3001537679f, 0.08611519592f, -0.2788782453f, 0.09795110726f, 0.2665752752f, 0.140359426f, -0.1491768253f, 0.008816271194f, -0.425643481f,
 	};
-	private static readonly float[] CELL_3D_Z =
+	private static readonly FN_DECIMAL[] CELL_3D_Z =
 	{
 		-0.0956981749f, -0.4255470325f, -0.3449535616f, 0.3741848704f, -0.2530858567f, -0.238463215f, 0.3044271714f, 0.03244149937f, -0.1265461359f, 0.1775613147f, 0.2796677792f, -0.07901746678f, 0.2243054374f, 0.3867342179f, 0.08470692262f, 0.2289725438f,
 		0.3568720405f, -0.07453178509f, -0.3830421561f, 0.2622305365f, -0.2461670583f, -0.2142341261f, -0.2445373252f, 0.2559320961f, -0.4198838754f, -0.2284613961f, -0.2211087107f, 0.314908508f, -0.3686842991f, 0.05492788837f, 0.3551999201f, 0.3059600725f,
@@ -268,31 +288,35 @@ public class FastNoise
 		-0.2334146693f, -0.2712420987f, -0.2523278991f, -0.3144428146f, -0.2497981362f, 0.3130537363f, -0.1693876312f, -0.1443188342f, 0.2756962409f, -0.3029914042f, 0.4375151083f, 0.08105160988f, -0.4274764309f, -0.1231199324f, -0.4021797064f, -0.1251477955f,
 	};
 
-#if UNITY_5
-	private const short methodImplOption = 0;
-#else
-	private const MethodImplOptions methodImplOption = MethodImplOptions.AggressiveInlining;
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
+	private static int FastFloor(FN_DECIMAL f) { return (f >= 0.0f ? (int)f : (int)f - 1); }
 
-	[MethodImpl(methodImplOption)]
-	private static int FastFloor(float f) { return (f >= 0.0f ? (int)f : (int)f - 1); }
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	private static int FastRound(FN_DECIMAL f) { return (f >= 0.0f) ? (int)(f + 0.5f) : (int)(f - 0.5f); }
 
-	[MethodImpl(methodImplOption)]
-	private static int FastRound(float f) { return (f >= 0.0f) ? (int)(f + 0.5f) : (int)(f - 0.5f); }
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	private static FN_DECIMAL Lerp(FN_DECIMAL a, FN_DECIMAL b, FN_DECIMAL t) { return a + t * (b - a); }
 
-	[MethodImpl(methodImplOption)]
-	private static float Lerp(float a, float b, float t) { return a + t * (b - a); }
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	private static FN_DECIMAL InterpHermiteFunc(FN_DECIMAL t) { return t * t * (3 - 2 * t); }
 
-	[MethodImpl(methodImplOption)]
-	private static float InterpHermiteFunc(float t) { return t * t * (3 - 2 * t); }
-
-	[MethodImpl(methodImplOption)]
-	private static float InterpQuinticFunc(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	private static FN_DECIMAL InterpQuinticFunc(FN_DECIMAL t) { return t * t * t * (t * (t * 6 - 15) + 10); }
 
 	private void CalculateFractalBounding()
 	{
-		float amp = m_gain;
-		float ampFractal = 1.0f;
+		FN_DECIMAL amp = m_gain;
+		FN_DECIMAL ampFractal = 1.0f;
 		for (int i = 1; i < m_octaves; i++)
 		{
 			ampFractal += amp;
@@ -321,19 +345,25 @@ public class FastNoise
 		}
 	}
 
-	[MethodImpl(methodImplOption)]
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
 	private byte Index2D_256(byte offset, int x, int y)
 	{
 		return m_perm[(x & 0xff) + m_perm[(y & 0xff) + offset]];
 	}
 
-	[MethodImpl(methodImplOption)]
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
 	private byte Index3D_256(byte offset, int x, int y, int z)
 	{
 		return m_perm[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + offset]]];
 	}
 
-	[MethodImpl(methodImplOption)]
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
 	private byte Index4D_256(byte offset, int x, int y, int z, int w)
 	{
 		return m_perm[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + m_perm[(w & 0xff) + offset]]]];
@@ -345,8 +375,10 @@ public class FastNoise
 	private const int Z_PRIME = 6971;
 	private const int W_PRIME = 1013;
 
-	[MethodImpl(methodImplOption)]
-	static float ValCoord2D(int seed, int x, int y)
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	static FN_DECIMAL ValCoord2D(int seed, int x, int y)
 	{
 		int n = X_PRIME * x;
 		n += Y_PRIME * y;
@@ -356,8 +388,10 @@ public class FastNoise
 		return 9.311924889611565e-10f * (((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff) - 1073891824);
 	}
 
-	[MethodImpl(methodImplOption)]
-	static float ValCoord3D(int seed, int x, int y, int z)
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	static FN_DECIMAL ValCoord3D(int seed, int x, int y, int z)
 	{
 		int n = X_PRIME * x;
 		n += Y_PRIME * y;
@@ -368,8 +402,10 @@ public class FastNoise
 		return 9.311924889611565e-10f * (((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff) - 1073891824);
 	}
 
-	[MethodImpl(methodImplOption)]
-	static float ValCoord4D(int seed, int x, int y, int z, int w)
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	static FN_DECIMAL ValCoord4D(int seed, int x, int y, int z, int w)
 	{
 		int n = X_PRIME * x;
 		n += Y_PRIME * y;
@@ -381,43 +417,53 @@ public class FastNoise
 		return 9.311924889611565e-10f * (((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff) - 1073891824);
 	}
 
-	[MethodImpl(methodImplOption)]
-	private float ValCoord2DFast(byte offset, int x, int y)
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	private FN_DECIMAL ValCoord2DFast(byte offset, int x, int y)
 	{
 		return VAL_LUT[Index2D_256(offset, x, y)];
 	}
 
-	[MethodImpl(methodImplOption)]
-	private float ValCoord3DFast(byte offset, int x, int y, int z)
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	private FN_DECIMAL ValCoord3DFast(byte offset, int x, int y, int z)
 	{
 		return VAL_LUT[Index3D_256(offset, x, y, z)];
 	}
 
-	[MethodImpl(methodImplOption)]
-	private float GradCoord2D(byte offset, int x, int y, float xd, float yd)
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	private FN_DECIMAL GradCoord2D(byte offset, int x, int y, FN_DECIMAL xd, FN_DECIMAL yd)
 	{
 		byte lutPos = m_perm12[(x & 0xff) + m_perm[(y & 0xff) + offset]];
 
 		return xd * GRAD_X[lutPos] + yd * GRAD_Y[lutPos];
 	}
 
-	[MethodImpl(methodImplOption)]
-	private float GradCoord3D(byte offset, int x, int y, int z, float xd, float yd, float zd)
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	private FN_DECIMAL GradCoord3D(byte offset, int x, int y, int z, FN_DECIMAL xd, FN_DECIMAL yd, FN_DECIMAL zd)
 	{
 		byte lutPos = m_perm12[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + offset]]];
 
 		return xd * GRAD_X[lutPos] + yd * GRAD_Y[lutPos] + zd * GRAD_Z[lutPos];
 	}
 
-	[MethodImpl(methodImplOption)]
-	private float GradCoord4D(byte offset, int x, int y, int z, int w, float xd, float yd, float zd, float wd)
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+	private FN_DECIMAL GradCoord4D(byte offset, int x, int y, int z, int w, FN_DECIMAL xd, FN_DECIMAL yd, FN_DECIMAL zd, FN_DECIMAL wd)
 	{
 		byte lutPos = (byte)(m_perm[(x & 0xff) + m_perm[(y & 0xff) + m_perm[(z & 0xff) + m_perm[(w & 0xff) + offset]]]] & 31);
 
 		return xd * GRAD_4D[lutPos] + yd * GRAD_4D[lutPos + 1] + zd * GRAD_4D[lutPos + 2] + wd * GRAD_4D[lutPos + 3];
 	}
 
-	public float GetNoise(float x, float y, float z)
+	public FN_DECIMAL GetNoise(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -484,7 +530,7 @@ public class FastNoise
 		}
 	}
 
-	public float GetNoise(float x, float y)
+	public FN_DECIMAL GetNoise(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -551,12 +597,12 @@ public class FastNoise
 	}
 
 	// White Noise
-	private int FloatCast2Int(float f)
+	private int FloatCast2Int(FN_DECIMAL f)
 	{
 		return BitConverter.ToInt32(BitConverter.GetBytes(f), 0);
 	}
 
-	public float GetWhiteNoise(float x, float y, float z, float w)
+	public FN_DECIMAL GetWhiteNoise(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, FN_DECIMAL w)
 	{
 		int xi = FloatCast2Int(x);
 		int yi = FloatCast2Int(y);
@@ -570,7 +616,7 @@ public class FastNoise
 			wi ^ (wi >> 16));
 	}
 
-	public float GetWhiteNoise(float x, float y, float z)
+	public FN_DECIMAL GetWhiteNoise(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		int xi = FloatCast2Int(x);
 		int yi = FloatCast2Int(y);
@@ -582,7 +628,7 @@ public class FastNoise
 			zi ^ (zi >> 16));
 	}
 
-	public float GetWhiteNoise(float x, float y)
+	public FN_DECIMAL GetWhiteNoise(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		int xi = FloatCast2Int(x);
 		int yi = FloatCast2Int(y);
@@ -592,23 +638,23 @@ public class FastNoise
 			yi ^ (yi >> 16));
 	}
 
-	public float GetWhiteNoiseInt(int x, int y, int z, int w)
+	public FN_DECIMAL GetWhiteNoiseInt(int x, int y, int z, int w)
 	{
 		return ValCoord4D(m_seed, x, y, z, w);
 	}
 
-	public float GetWhiteNoiseInt(int x, int y, int z)
+	public FN_DECIMAL GetWhiteNoiseInt(int x, int y, int z)
 	{
 		return ValCoord3D(m_seed, x, y, z);
 	}
 
-	public float GetWhiteNoiseInt(int x, int y)
+	public FN_DECIMAL GetWhiteNoiseInt(int x, int y)
 	{
 		return ValCoord2D(m_seed, x, y);
 	}
 
 	// Value Noise
-	public float GetValueFractal(float x, float y, float z)
+	public FN_DECIMAL GetValueFractal(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -627,10 +673,10 @@ public class FastNoise
 		}
 	}
 
-	private float SingleValueFractalFBM(float x, float y, float z)
+	private FN_DECIMAL SingleValueFractalFBM(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float sum = SingleValue(m_perm[0], x, y, z);
-		float amp = 1.0f;
+		FN_DECIMAL sum = SingleValue(m_perm[0], x, y, z);
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -645,10 +691,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleValueFractalBillow(float x, float y, float z)
+	private FN_DECIMAL SingleValueFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float sum = Math.Abs(SingleValue(m_perm[0], x, y, z)) * 2.0f - 1.0f;
-		float amp = 1.0f;
+		FN_DECIMAL sum = Math.Abs(SingleValue(m_perm[0], x, y, z)) * 2.0f - 1.0f;
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -663,10 +709,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleValueFractalRigidMulti(float x, float y, float z)
+	private FN_DECIMAL SingleValueFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y, z));
-		float amp = 1.0f;
+		FN_DECIMAL sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y, z));
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -681,12 +727,12 @@ public class FastNoise
 		return sum;
 	}
 
-	public float GetValue(float x, float y, float z)
+	public FN_DECIMAL GetValue(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		return SingleValue(0, x * m_frequency, y * m_frequency, z * m_frequency);
 	}
 
-	private float SingleValue(byte offset, float x, float y, float z)
+	private FN_DECIMAL SingleValue(byte offset, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		int x0 = FastFloor(x);
 		int y0 = FastFloor(y);
@@ -695,7 +741,7 @@ public class FastNoise
 		int y1 = y0 + 1;
 		int z1 = z0 + 1;
 
-		float xs, ys, zs;
+		FN_DECIMAL xs, ys, zs;
 		switch (m_interp)
 		{
 			default:
@@ -716,18 +762,18 @@ public class FastNoise
 				break;
 		}
 
-		float xf00 = Lerp(ValCoord3DFast(offset, x0, y0, z0), ValCoord3DFast(offset, x1, y0, z0), xs);
-		float xf10 = Lerp(ValCoord3DFast(offset, x0, y1, z0), ValCoord3DFast(offset, x1, y1, z0), xs);
-		float xf01 = Lerp(ValCoord3DFast(offset, x0, y0, z1), ValCoord3DFast(offset, x1, y0, z1), xs);
-		float xf11 = Lerp(ValCoord3DFast(offset, x0, y1, z1), ValCoord3DFast(offset, x1, y1, z1), xs);
+		FN_DECIMAL xf00 = Lerp(ValCoord3DFast(offset, x0, y0, z0), ValCoord3DFast(offset, x1, y0, z0), xs);
+		FN_DECIMAL xf10 = Lerp(ValCoord3DFast(offset, x0, y1, z0), ValCoord3DFast(offset, x1, y1, z0), xs);
+		FN_DECIMAL xf01 = Lerp(ValCoord3DFast(offset, x0, y0, z1), ValCoord3DFast(offset, x1, y0, z1), xs);
+		FN_DECIMAL xf11 = Lerp(ValCoord3DFast(offset, x0, y1, z1), ValCoord3DFast(offset, x1, y1, z1), xs);
 
-		float yf0 = Lerp(xf00, xf10, ys);
-		float yf1 = Lerp(xf01, xf11, ys);
+		FN_DECIMAL yf0 = Lerp(xf00, xf10, ys);
+		FN_DECIMAL yf1 = Lerp(xf01, xf11, ys);
 
 		return Lerp(yf0, yf1, zs);
 	}
 
-	public float GetValueFractal(float x, float y)
+	public FN_DECIMAL GetValueFractal(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -745,10 +791,10 @@ public class FastNoise
 		}
 	}
 
-	private float SingleValueFractalFBM(float x, float y)
+	private FN_DECIMAL SingleValueFractalFBM(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float sum = SingleValue(m_perm[0], x, y);
-		float amp = 1.0f;
+		FN_DECIMAL sum = SingleValue(m_perm[0], x, y);
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -762,10 +808,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleValueFractalBillow(float x, float y)
+	private FN_DECIMAL SingleValueFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float sum = Math.Abs(SingleValue(m_perm[0], x, y)) * 2.0f - 1.0f;
-		float amp = 1.0f;
+		FN_DECIMAL sum = Math.Abs(SingleValue(m_perm[0], x, y)) * 2.0f - 1.0f;
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -778,10 +824,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleValueFractalRigidMulti(float x, float y)
+	private FN_DECIMAL SingleValueFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y));
-		float amp = 1.0f;
+		FN_DECIMAL sum = 1.0f - Math.Abs(SingleValue(m_perm[0], x, y));
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -795,19 +841,19 @@ public class FastNoise
 		return sum;
 	}
 
-	public float GetValue(float x, float y)
+	public FN_DECIMAL GetValue(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		return SingleValue(0, x * m_frequency, y * m_frequency);
 	}
 
-	private float SingleValue(byte offset, float x, float y)
+	private FN_DECIMAL SingleValue(byte offset, FN_DECIMAL x, FN_DECIMAL y)
 	{
 		int x0 = FastFloor(x);
 		int y0 = FastFloor(y);
 		int x1 = x0 + 1;
 		int y1 = y0 + 1;
 
-		float xs, ys;
+		FN_DECIMAL xs, ys;
 		switch (m_interp)
 		{
 			default:
@@ -825,14 +871,14 @@ public class FastNoise
 				break;
 		}
 
-		float xf0 = Lerp(ValCoord2DFast(offset, x0, y0), ValCoord2DFast(offset, x1, y0), xs);
-		float xf1 = Lerp(ValCoord2DFast(offset, x0, y1), ValCoord2DFast(offset, x1, y1), xs);
+		FN_DECIMAL xf0 = Lerp(ValCoord2DFast(offset, x0, y0), ValCoord2DFast(offset, x1, y0), xs);
+		FN_DECIMAL xf1 = Lerp(ValCoord2DFast(offset, x0, y1), ValCoord2DFast(offset, x1, y1), xs);
 
 		return Lerp(xf0, xf1, ys);
 	}
 
 	// Gradient Noise
-	public float GetGradientFractal(float x, float y, float z)
+	public FN_DECIMAL GetGradientFractal(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -851,10 +897,10 @@ public class FastNoise
 		}
 	}
 
-	private float SingleGradientFractalFBM(float x, float y, float z)
+	private FN_DECIMAL SingleGradientFractalFBM(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float sum = SingleGradient(m_perm[0], x, y, z);
-		float amp = 1.0f;
+		FN_DECIMAL sum = SingleGradient(m_perm[0], x, y, z);
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -869,10 +915,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleGradientFractalBillow(float x, float y, float z)
+	private FN_DECIMAL SingleGradientFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float sum = Math.Abs(SingleGradient(m_perm[0], x, y, z)) * 2.0f - 1.0f;
-		float amp = 1.0f;
+		FN_DECIMAL sum = Math.Abs(SingleGradient(m_perm[0], x, y, z)) * 2.0f - 1.0f;
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -887,10 +933,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleGradientFractalRigidMulti(float x, float y, float z)
+	private FN_DECIMAL SingleGradientFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float sum = 1.0f - Math.Abs(SingleGradient(m_perm[0], x, y, z));
-		float amp = 1.0f;
+		FN_DECIMAL sum = 1.0f - Math.Abs(SingleGradient(m_perm[0], x, y, z));
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -905,12 +951,12 @@ public class FastNoise
 		return sum;
 	}
 
-	public float GetGradient(float x, float y, float z)
+	public FN_DECIMAL GetGradient(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		return SingleGradient(0, x * m_frequency, y * m_frequency, z * m_frequency);
 	}
 
-	private float SingleGradient(byte offset, float x, float y, float z)
+	private FN_DECIMAL SingleGradient(byte offset, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		int x0 = FastFloor(x);
 		int y0 = FastFloor(y);
@@ -919,7 +965,7 @@ public class FastNoise
 		int y1 = y0 + 1;
 		int z1 = z0 + 1;
 
-		float xs, ys, zs;
+		FN_DECIMAL xs, ys, zs;
 		switch (m_interp)
 		{
 			default:
@@ -940,25 +986,25 @@ public class FastNoise
 				break;
 		}
 
-		float xd0 = x - x0;
-		float yd0 = y - y0;
-		float zd0 = z - z0;
-		float xd1 = xd0 - 1.0f;
-		float yd1 = yd0 - 1.0f;
-		float zd1 = zd0 - 1.0f;
+		FN_DECIMAL xd0 = x - x0;
+		FN_DECIMAL yd0 = y - y0;
+		FN_DECIMAL zd0 = z - z0;
+		FN_DECIMAL xd1 = xd0 - 1.0f;
+		FN_DECIMAL yd1 = yd0 - 1.0f;
+		FN_DECIMAL zd1 = zd0 - 1.0f;
 
-		float xf00 = Lerp(GradCoord3D(offset, x0, y0, z0, xd0, yd0, zd0), GradCoord3D(offset, x1, y0, z0, xd1, yd0, zd0), xs);
-		float xf10 = Lerp(GradCoord3D(offset, x0, y1, z0, xd0, yd1, zd0), GradCoord3D(offset, x1, y1, z0, xd1, yd1, zd0), xs);
-		float xf01 = Lerp(GradCoord3D(offset, x0, y0, z1, xd0, yd0, zd1), GradCoord3D(offset, x1, y0, z1, xd1, yd0, zd1), xs);
-		float xf11 = Lerp(GradCoord3D(offset, x0, y1, z1, xd0, yd1, zd1), GradCoord3D(offset, x1, y1, z1, xd1, yd1, zd1), xs);
+		FN_DECIMAL xf00 = Lerp(GradCoord3D(offset, x0, y0, z0, xd0, yd0, zd0), GradCoord3D(offset, x1, y0, z0, xd1, yd0, zd0), xs);
+		FN_DECIMAL xf10 = Lerp(GradCoord3D(offset, x0, y1, z0, xd0, yd1, zd0), GradCoord3D(offset, x1, y1, z0, xd1, yd1, zd0), xs);
+		FN_DECIMAL xf01 = Lerp(GradCoord3D(offset, x0, y0, z1, xd0, yd0, zd1), GradCoord3D(offset, x1, y0, z1, xd1, yd0, zd1), xs);
+		FN_DECIMAL xf11 = Lerp(GradCoord3D(offset, x0, y1, z1, xd0, yd1, zd1), GradCoord3D(offset, x1, y1, z1, xd1, yd1, zd1), xs);
 
-		float yf0 = Lerp(xf00, xf10, ys);
-		float yf1 = Lerp(xf01, xf11, ys);
+		FN_DECIMAL yf0 = Lerp(xf00, xf10, ys);
+		FN_DECIMAL yf1 = Lerp(xf01, xf11, ys);
 
 		return Lerp(yf0, yf1, zs);
 	}
 
-	public float GetGradientFractal(float x, float y)
+	public FN_DECIMAL GetGradientFractal(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -976,10 +1022,10 @@ public class FastNoise
 		}
 	}
 
-	private float SingleGradientFractalFBM(float x, float y)
+	private FN_DECIMAL SingleGradientFractalFBM(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float sum = SingleGradient(m_perm[0], x, y);
-		float amp = 1.0f;
+		FN_DECIMAL sum = SingleGradient(m_perm[0], x, y);
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -993,10 +1039,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleGradientFractalBillow(float x, float y)
+	private FN_DECIMAL SingleGradientFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float sum = Math.Abs(SingleGradient(m_perm[0], x, y)) * 2.0f - 1.0f;
-		float amp = 1.0f;
+		FN_DECIMAL sum = Math.Abs(SingleGradient(m_perm[0], x, y)) * 2.0f - 1.0f;
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1010,10 +1056,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleGradientFractalRigidMulti(float x, float y)
+	private FN_DECIMAL SingleGradientFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float sum = 1.0f - Math.Abs(SingleGradient(m_perm[0], x, y));
-		float amp = 1.0f;
+		FN_DECIMAL sum = 1.0f - Math.Abs(SingleGradient(m_perm[0], x, y));
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1027,19 +1073,19 @@ public class FastNoise
 		return sum;
 	}
 
-	public float GetGradient(float x, float y)
+	public FN_DECIMAL GetGradient(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		return SingleGradient(0, x * m_frequency, y * m_frequency);
 	}
 
-	private float SingleGradient(byte offset, float x, float y)
+	private FN_DECIMAL SingleGradient(byte offset, FN_DECIMAL x, FN_DECIMAL y)
 	{
 		int x0 = FastFloor(x);
 		int y0 = FastFloor(y);
 		int x1 = x0 + 1;
 		int y1 = y0 + 1;
 
-		float xs, ys;
+		FN_DECIMAL xs, ys;
 		switch (m_interp)
 		{
 			default:
@@ -1057,19 +1103,19 @@ public class FastNoise
 				break;
 		}
 
-		float xd0 = x - x0;
-		float yd0 = y - y0;
-		float xd1 = xd0 - 1.0f;
-		float yd1 = yd0 - 1.0f;
+		FN_DECIMAL xd0 = x - x0;
+		FN_DECIMAL yd0 = y - y0;
+		FN_DECIMAL xd1 = xd0 - 1.0f;
+		FN_DECIMAL yd1 = yd0 - 1.0f;
 
-		float xf0 = Lerp(GradCoord2D(offset, x0, y0, xd0, yd0), GradCoord2D(offset, x1, y0, xd1, yd0), xs);
-		float xf1 = Lerp(GradCoord2D(offset, x0, y1, xd0, yd1), GradCoord2D(offset, x1, y1, xd1, yd1), xs);
+		FN_DECIMAL xf0 = Lerp(GradCoord2D(offset, x0, y0, xd0, yd0), GradCoord2D(offset, x1, y0, xd1, yd0), xs);
+		FN_DECIMAL xf1 = Lerp(GradCoord2D(offset, x0, y1, xd0, yd1), GradCoord2D(offset, x1, y1, xd1, yd1), xs);
 
 		return Lerp(xf0, xf1, ys);
 	}
 
 	// Simplex Noise
-	public float GetSimplexFractal(float x, float y, float z)
+	public FN_DECIMAL GetSimplexFractal(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -1088,10 +1134,10 @@ public class FastNoise
 		}
 	}
 
-	private float SingleSimplexFractalFBM(float x, float y, float z)
+	private FN_DECIMAL SingleSimplexFractalFBM(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float sum = SingleSimplex(m_perm[0], x, y, z);
-		float amp = 1.0f;
+		FN_DECIMAL sum = SingleSimplex(m_perm[0], x, y, z);
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1106,10 +1152,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleSimplexFractalBillow(float x, float y, float z)
+	private FN_DECIMAL SingleSimplexFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float sum = Math.Abs(SingleSimplex(m_perm[0], x, y, z)) * 2.0f - 1.0f;
-		float amp = 1.0f;
+		FN_DECIMAL sum = Math.Abs(SingleSimplex(m_perm[0], x, y, z)) * 2.0f - 1.0f;
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1124,10 +1170,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleSimplexFractalRigidMulti(float x, float y, float z)
+	private FN_DECIMAL SingleSimplexFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y, z));
-		float amp = 1.0f;
+		FN_DECIMAL sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y, z));
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1142,29 +1188,29 @@ public class FastNoise
 		return sum;
 	}
 
-	public float GetSimplex(float x, float y, float z)
+	public FN_DECIMAL GetSimplex(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		return SingleSimplex(0, x * m_frequency, y * m_frequency, z * m_frequency);
 	}
 
-	private const float F3 = 1.0f / 3.0f;
-	private const float G3 = 1.0f / 6.0f;
+	private const FN_DECIMAL F3 = 1.0f / 3.0f;
+	private const FN_DECIMAL G3 = 1.0f / 6.0f;
 
-	private float SingleSimplex(byte offset, float x, float y, float z)
+	private FN_DECIMAL SingleSimplex(byte offset, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		float t = (x + y + z) * F3;
+		FN_DECIMAL t = (x + y + z) * F3;
 		int i = FastFloor(x + t);
 		int j = FastFloor(y + t);
 		int k = FastFloor(z + t);
 
 		t = (i + j + k) * G3;
-		float X0 = i - t;
-		float Y0 = j - t;
-		float Z0 = k - t;
+		FN_DECIMAL X0 = i - t;
+		FN_DECIMAL Y0 = j - t;
+		FN_DECIMAL Z0 = k - t;
 
-		float x0 = x - X0;
-		float y0 = y - Y0;
-		float z0 = z - Z0;
+		FN_DECIMAL x0 = x - X0;
+		FN_DECIMAL y0 = y - Y0;
+		FN_DECIMAL z0 = z - Z0;
 
 		int i1, j1, k1;
 		int i2, j2, k2;
@@ -1200,17 +1246,17 @@ public class FastNoise
 			}
 		}
 
-		float x1 = x0 - i1 + G3;
-		float y1 = y0 - j1 + G3;
-		float z1 = z0 - k1 + G3;
-		float x2 = x0 - i2 + 2.0f * G3;
-		float y2 = y0 - j2 + 2.0f * G3;
-		float z2 = z0 - k2 + 2.0f * G3;
-		float x3 = x0 - 1.0f + 3.0f * G3;
-		float y3 = y0 - 1.0f + 3.0f * G3;
-		float z3 = z0 - 1.0f + 3.0f * G3;
+		FN_DECIMAL x1 = x0 - i1 + G3;
+		FN_DECIMAL y1 = y0 - j1 + G3;
+		FN_DECIMAL z1 = z0 - k1 + G3;
+		FN_DECIMAL x2 = x0 - i2 + 2.0f * G3;
+		FN_DECIMAL y2 = y0 - j2 + 2.0f * G3;
+		FN_DECIMAL z2 = z0 - k2 + 2.0f * G3;
+		FN_DECIMAL x3 = x0 - 1.0f + 3.0f * G3;
+		FN_DECIMAL y3 = y0 - 1.0f + 3.0f * G3;
+		FN_DECIMAL z3 = z0 - 1.0f + 3.0f * G3;
 
-		float n0, n1, n2, n3;
+		FN_DECIMAL n0, n1, n2, n3;
 
 		t = 0.6f - x0 * x0 - y0 * y0 - z0 * z0;
 		if (t < 0.0f) n0 = 0.0f;
@@ -1247,7 +1293,7 @@ public class FastNoise
 		return 32.0f * (n0 + n1 + n2 + n3);
 	}
 
-	public float GetSimplexFractal(float x, float y)
+	public FN_DECIMAL GetSimplexFractal(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -1265,10 +1311,10 @@ public class FastNoise
 		}
 	}
 
-	private float SingleSimplexFractalFBM(float x, float y)
+	private FN_DECIMAL SingleSimplexFractalFBM(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float sum = SingleSimplex(m_perm[0], x, y);
-		float amp = 1.0f;
+		FN_DECIMAL sum = SingleSimplex(m_perm[0], x, y);
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1282,10 +1328,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleSimplexFractalBillow(float x, float y)
+	private FN_DECIMAL SingleSimplexFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float sum = Math.Abs(SingleSimplex(m_perm[0], x, y)) * 2.0f - 1.0f;
-		float amp = 1.0f;
+		FN_DECIMAL sum = Math.Abs(SingleSimplex(m_perm[0], x, y)) * 2.0f - 1.0f;
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1299,10 +1345,10 @@ public class FastNoise
 		return sum * m_fractalBounding;
 	}
 
-	private float SingleSimplexFractalRigidMulti(float x, float y)
+	private FN_DECIMAL SingleSimplexFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y));
-		float amp = 1.0f;
+		FN_DECIMAL sum = 1.0f - Math.Abs(SingleSimplex(m_perm[0], x, y));
+		FN_DECIMAL amp = 1.0f;
 
 		for (int i = 1; i < m_octaves; i++)
 		{
@@ -1316,26 +1362,26 @@ public class FastNoise
 		return sum;
 	}
 
-	public float GetSimplex(float x, float y)
+	public FN_DECIMAL GetSimplex(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		return SingleSimplex(0, x * m_frequency, y * m_frequency);
 	}
 
-	private const float F2 = 1.0f / 2.0f;
-	private const float G2 = 1.0f / 4.0f;
+	private const FN_DECIMAL F2 = 1.0f / 2.0f;
+	private const FN_DECIMAL G2 = 1.0f / 4.0f;
 
-	private float SingleSimplex(byte offset, float x, float y)
+	private FN_DECIMAL SingleSimplex(byte offset, FN_DECIMAL x, FN_DECIMAL y)
 	{
-		float t = (x + y) * F2;
+		FN_DECIMAL t = (x + y) * F2;
 		int i = FastFloor(x + t);
 		int j = FastFloor(y + t);
 
 		t = (i + j) * G2;
-		float X0 = i - t;
-		float Y0 = j - t;
+		FN_DECIMAL X0 = i - t;
+		FN_DECIMAL Y0 = j - t;
 
-		float x0 = x - X0;
-		float y0 = y - Y0;
+		FN_DECIMAL x0 = x - X0;
+		FN_DECIMAL y0 = y - Y0;
 
 		int i1, j1;
 		if (x0 > y0)
@@ -1347,12 +1393,12 @@ public class FastNoise
 			i1 = 0; j1 = 1;
 		}
 
-		float x1 = x0 - i1 + G2;
-		float y1 = y0 - j1 + G2;
-		float x2 = x0 - 1.0f + 2.0f * G2;
-		float y2 = y0 - 1.0f + 2.0f * G2;
+		FN_DECIMAL x1 = x0 - i1 + G2;
+		FN_DECIMAL y1 = y0 - j1 + G2;
+		FN_DECIMAL x2 = x0 - 1.0f + 2.0f * G2;
+		FN_DECIMAL y2 = y0 - 1.0f + 2.0f * G2;
 
-		float n0, n1, n2;
+		FN_DECIMAL n0, n1, n2;
 
 		t = 0.5f - x0 * x0 - y0 * y0;
 		if (t < 0) n0 = 0;
@@ -1381,7 +1427,7 @@ public class FastNoise
 		return 50.0f * (n0 + n1 + n2);
 	}
 
-	public float GetSimplex(float x, float y, float z, float w)
+	public FN_DECIMAL GetSimplex(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, FN_DECIMAL w)
 	{
 		return SingleSimplex(0, x * m_frequency, y * m_frequency, z * m_frequency, w * m_frequency);
 	}
@@ -1398,26 +1444,26 @@ public class FastNoise
 		2,1,0,3,0,0,0,0,0,0,0,0,0,0,0,0,3,1,0,2,0,0,0,0,3,2,0,1,3,2,1,0
 	};
 
-	private const float F4 = (2.23606797f - 1.0f) / 4.0f;
-	private const float G4 = (5.0f - 2.23606797f) / 20.0f;
+	private const FN_DECIMAL F4 = (2.23606797f - 1.0f) / 4.0f;
+	private const FN_DECIMAL G4 = (5.0f - 2.23606797f) / 20.0f;
 
-	private float SingleSimplex(byte offset, float x, float y, float z, float w)
+	private FN_DECIMAL SingleSimplex(byte offset, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, FN_DECIMAL w)
 	{
-		float n0, n1, n2, n3, n4;
-		float t = (x + y + z + w) * F4;
+		FN_DECIMAL n0, n1, n2, n3, n4;
+		FN_DECIMAL t = (x + y + z + w) * F4;
 		int i = FastFloor(x + t);
 		int j = FastFloor(y + t);
 		int k = FastFloor(z + t);
 		int l = FastFloor(w + t);
 		t = (i + j + k + l) * G4;
-		float X0 = i - t;
-		float Y0 = j - t;
-		float Z0 = k - t;
-		float W0 = l - t;
-		float x0 = x - X0;
-		float y0 = y - Y0;
-		float z0 = z - Z0;
-		float w0 = w - W0;
+		FN_DECIMAL X0 = i - t;
+		FN_DECIMAL Y0 = j - t;
+		FN_DECIMAL Z0 = k - t;
+		FN_DECIMAL W0 = l - t;
+		FN_DECIMAL x0 = x - X0;
+		FN_DECIMAL y0 = y - Y0;
+		FN_DECIMAL z0 = z - Z0;
+		FN_DECIMAL w0 = w - W0;
 
 		int c = (x0 > y0) ? 32 : 0;
 		c += (x0 > z0) ? 16 : 0;
@@ -1440,22 +1486,22 @@ public class FastNoise
 		int l2 = SIMPLEX_4D[c] >= 2 ? 1 : 0;
 		int l3 = SIMPLEX_4D[c] >= 1 ? 1 : 0;
 
-		float x1 = x0 - i1 + G4;
-		float y1 = y0 - j1 + G4;
-		float z1 = z0 - k1 + G4;
-		float w1 = w0 - l1 + G4;
-		float x2 = x0 - i2 + 2.0f * G4;
-		float y2 = y0 - j2 + 2.0f * G4;
-		float z2 = z0 - k2 + 2.0f * G4;
-		float w2 = w0 - l2 + 2.0f * G4;
-		float x3 = x0 - i3 + 3.0f * G4;
-		float y3 = y0 - j3 + 3.0f * G4;
-		float z3 = z0 - k3 + 3.0f * G4;
-		float w3 = w0 - l3 + 3.0f * G4;
-		float x4 = x0 - 1.0f + 4.0f * G4;
-		float y4 = y0 - 1.0f + 4.0f * G4;
-		float z4 = z0 - 1.0f + 4.0f * G4;
-		float w4 = w0 - 1.0f + 4.0f * G4;
+		FN_DECIMAL x1 = x0 - i1 + G4;
+		FN_DECIMAL y1 = y0 - j1 + G4;
+		FN_DECIMAL z1 = z0 - k1 + G4;
+		FN_DECIMAL w1 = w0 - l1 + G4;
+		FN_DECIMAL x2 = x0 - i2 + 2.0f * G4;
+		FN_DECIMAL y2 = y0 - j2 + 2.0f * G4;
+		FN_DECIMAL z2 = z0 - k2 + 2.0f * G4;
+		FN_DECIMAL w2 = w0 - l2 + 2.0f * G4;
+		FN_DECIMAL x3 = x0 - i3 + 3.0f * G4;
+		FN_DECIMAL y3 = y0 - j3 + 3.0f * G4;
+		FN_DECIMAL z3 = z0 - k3 + 3.0f * G4;
+		FN_DECIMAL w3 = w0 - l3 + 3.0f * G4;
+		FN_DECIMAL x4 = x0 - 1.0f + 4.0f * G4;
+		FN_DECIMAL y4 = y0 - 1.0f + 4.0f * G4;
+		FN_DECIMAL z4 = z0 - 1.0f + 4.0f * G4;
+		FN_DECIMAL w4 = w0 - 1.0f + 4.0f * G4;
 
 		t = 0.6f - x0 * x0 - y0 * y0 - z0 * z0 - w0 * w0;
 		if (t < 0.0f) n0 = 0.0f;
@@ -1497,7 +1543,7 @@ public class FastNoise
 	}
 
 	// Cellular Noise
-	public float GetCellular(float x, float y, float z)
+	public FN_DECIMAL GetCellular(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -1514,13 +1560,13 @@ public class FastNoise
 		}
 	}
 
-	private float SingleCellular(float x, float y, float z)
+	private FN_DECIMAL SingleCellular(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		int xr = FastRound(x);
 		int yr = FastRound(y);
 		int zr = FastRound(z);
 
-		float distance = 999999.0f;
+		FN_DECIMAL distance = 999999.0f;
 		int xc = 0, yc = 0, zc = 0;
 
 		switch (m_cellularDistanceFunction)
@@ -1534,11 +1580,11 @@ public class FastNoise
 						{
 							byte lutPos = Index3D_256(0, xi, yi, zi);
 
-							float vecX = xi - x + CELL_3D_X[lutPos];
-							float vecY = yi - y + CELL_3D_Y[lutPos];
-							float vecZ = zi - z + CELL_3D_Z[lutPos];
+							FN_DECIMAL vecX = xi - x + CELL_3D_X[lutPos];
+							FN_DECIMAL vecY = yi - y + CELL_3D_Y[lutPos];
+							FN_DECIMAL vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
+							FN_DECIMAL newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
 
 							if (newDistance < distance)
 							{
@@ -1560,11 +1606,11 @@ public class FastNoise
 						{
 							byte lutPos = Index3D_256(0, xi, yi, zi);
 
-							float vecX = xi - x + CELL_3D_X[lutPos];
-							float vecY = yi - y + CELL_3D_Y[lutPos];
-							float vecZ = zi - z + CELL_3D_Z[lutPos];
+							FN_DECIMAL vecX = xi - x + CELL_3D_X[lutPos];
+							FN_DECIMAL vecY = yi - y + CELL_3D_Y[lutPos];
+							FN_DECIMAL vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
+							FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
 
 							if (newDistance < distance)
 							{
@@ -1586,11 +1632,11 @@ public class FastNoise
 						{
 							byte lutPos = Index3D_256(0, xi, yi, zi);
 
-							float vecX = xi - x + CELL_3D_X[lutPos];
-							float vecY = yi - y + CELL_3D_Y[lutPos];
-							float vecZ = zi - z + CELL_3D_Z[lutPos];
+							FN_DECIMAL vecX = xi - x + CELL_3D_X[lutPos];
+							FN_DECIMAL vecY = yi - y + CELL_3D_Y[lutPos];
+							FN_DECIMAL vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+							FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
 							if (newDistance < distance)
 							{
@@ -1621,14 +1667,14 @@ public class FastNoise
 		}
 	}
 
-	private float SingleCellular2Edge(float x, float y, float z)
+	private FN_DECIMAL SingleCellular2Edge(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		int xr = FastRound(x);
 		int yr = FastRound(y);
 		int zr = FastRound(z);
 
-		float distance = 999999.0f;
-		float distance2 = 999999.0f;
+		FN_DECIMAL distance = 999999.0f;
+		FN_DECIMAL distance2 = 999999.0f;
 
 		switch (m_cellularDistanceFunction)
 		{
@@ -1641,11 +1687,11 @@ public class FastNoise
 						{
 							byte lutPos = Index3D_256(0, xi, yi, zi);
 
-							float vecX = xi - x + CELL_3D_X[lutPos];
-							float vecY = yi - y + CELL_3D_Y[lutPos];
-							float vecZ = zi - z + CELL_3D_Z[lutPos];
+							FN_DECIMAL vecX = xi - x + CELL_3D_X[lutPos];
+							FN_DECIMAL vecY = yi - y + CELL_3D_Y[lutPos];
+							FN_DECIMAL vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
+							FN_DECIMAL newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
 
 							distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
 							distance = Math.Min(distance, newDistance);
@@ -1662,11 +1708,11 @@ public class FastNoise
 						{
 							byte lutPos = Index3D_256(0, xi, yi, zi);
 
-							float vecX = xi - x + CELL_3D_X[lutPos];
-							float vecY = yi - y + CELL_3D_Y[lutPos];
-							float vecZ = zi - z + CELL_3D_Z[lutPos];
+							FN_DECIMAL vecX = xi - x + CELL_3D_X[lutPos];
+							FN_DECIMAL vecY = yi - y + CELL_3D_Y[lutPos];
+							FN_DECIMAL vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
+							FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
 
 							distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
 							distance = Math.Min(distance, newDistance);
@@ -1683,11 +1729,11 @@ public class FastNoise
 						{
 							byte lutPos = Index3D_256(0, xi, yi, zi);
 
-							float vecX = xi - x + CELL_3D_X[lutPos];
-							float vecY = yi - y + CELL_3D_Y[lutPos];
-							float vecZ = zi - z + CELL_3D_Z[lutPos];
+							FN_DECIMAL vecX = xi - x + CELL_3D_X[lutPos];
+							FN_DECIMAL vecY = yi - y + CELL_3D_Y[lutPos];
+							FN_DECIMAL vecZ = zi - z + CELL_3D_Z[lutPos];
 
-							float newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+							FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
 							distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
 							distance = Math.Min(distance, newDistance);
@@ -1716,7 +1762,7 @@ public class FastNoise
 		}
 	}
 
-	public float GetCellular(float x, float y)
+	public FN_DECIMAL GetCellular(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -1732,12 +1778,12 @@ public class FastNoise
 		}
 	}
 
-	private float SingleCellular(float x, float y)
+	private FN_DECIMAL SingleCellular(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		int xr = FastRound(x);
 		int yr = FastRound(y);
 
-		float distance = 999999.0f;
+		FN_DECIMAL distance = 999999.0f;
 		int xc = 0, yc = 0;
 
 		switch (m_cellularDistanceFunction)
@@ -1750,10 +1796,10 @@ public class FastNoise
 					{
 						byte lutPos = Index2D_256(0, xi, yi);
 
-						float vecX = xi - x + CELL_2D_X[lutPos];
-						float vecY = yi - y + CELL_2D_Y[lutPos];
+						FN_DECIMAL vecX = xi - x + CELL_2D_X[lutPos];
+						FN_DECIMAL vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = vecX * vecX + vecY * vecY;
+						FN_DECIMAL newDistance = vecX * vecX + vecY * vecY;
 
 						if (newDistance < distance)
 						{
@@ -1771,10 +1817,10 @@ public class FastNoise
 					{
 						byte lutPos = Index2D_256(0, xi, yi);
 
-						float vecX = xi - x + CELL_2D_X[lutPos];
-						float vecY = yi - y + CELL_2D_Y[lutPos];
+						FN_DECIMAL vecX = xi - x + CELL_2D_X[lutPos];
+						FN_DECIMAL vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = (Math.Abs(vecX) + Math.Abs(vecY));
+						FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY));
 
 						if (newDistance < distance)
 						{
@@ -1792,10 +1838,10 @@ public class FastNoise
 					{
 						byte lutPos = Index2D_256(0, xi, yi);
 
-						float vecX = xi - x + CELL_2D_X[lutPos];
-						float vecY = yi - y + CELL_2D_Y[lutPos];
+						FN_DECIMAL vecX = xi - x + CELL_2D_X[lutPos];
+						FN_DECIMAL vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
+						FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
 
 						if (newDistance < distance)
 						{
@@ -1824,13 +1870,13 @@ public class FastNoise
 		}
 	}
 
-	private float SingleCellular2Edge(float x, float y)
+	private FN_DECIMAL SingleCellular2Edge(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		int xr = FastRound(x);
 		int yr = FastRound(y);
 
-		float distance = 999999.0f;
-		float distance2 = 999999.0f;
+		FN_DECIMAL distance = 999999.0f;
+		FN_DECIMAL distance2 = 999999.0f;
 
 		switch (m_cellularDistanceFunction)
 		{
@@ -1842,10 +1888,10 @@ public class FastNoise
 					{
 						byte lutPos = Index2D_256(0, xi, yi);
 
-						float vecX = xi - x + CELL_2D_X[lutPos];
-						float vecY = yi - y + CELL_2D_Y[lutPos];
+						FN_DECIMAL vecX = xi - x + CELL_2D_X[lutPos];
+						FN_DECIMAL vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = vecX * vecX + vecY * vecY;
+						FN_DECIMAL newDistance = vecX * vecX + vecY * vecY;
 
 						distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
 						distance = Math.Min(distance, newDistance);
@@ -1859,10 +1905,10 @@ public class FastNoise
 					{
 						byte lutPos = Index2D_256(0, xi, yi);
 
-						float vecX = xi - x + CELL_2D_X[lutPos];
-						float vecY = yi - y + CELL_2D_Y[lutPos];
+						FN_DECIMAL vecX = xi - x + CELL_2D_X[lutPos];
+						FN_DECIMAL vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = Math.Abs(vecX) + Math.Abs(vecY);
+						FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY);
 
 						distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
 						distance = Math.Min(distance, newDistance);
@@ -1876,10 +1922,10 @@ public class FastNoise
 					{
 						byte lutPos = Index2D_256(0, xi, yi);
 
-						float vecX = xi - x + CELL_2D_X[lutPos];
-						float vecY = yi - y + CELL_2D_Y[lutPos];
+						FN_DECIMAL vecX = xi - x + CELL_2D_X[lutPos];
+						FN_DECIMAL vecY = yi - y + CELL_2D_Y[lutPos];
 
-						float newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
+						FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
 
 						distance2 = Math.Max(Math.Min(distance2, newDistance), distance);
 						distance = Math.Min(distance, newDistance);
@@ -1905,15 +1951,15 @@ public class FastNoise
 		}
 	}
 
-	public void PositionWarp(ref float x, ref float y, ref float z)
+	public void PositionWarp(ref FN_DECIMAL x, ref FN_DECIMAL y, ref FN_DECIMAL z)
 	{
 		SinglePositionWarp(0, m_positionWarpAmp, m_frequency, ref x, ref y, ref z);
 	}
 
-	public void PositionWarpFractal(ref float x, ref float y, ref float z)
+	public void PositionWarpFractal(ref FN_DECIMAL x, ref FN_DECIMAL y, ref FN_DECIMAL z)
 	{
-		float amp = m_positionWarpAmp * m_fractalBounding;
-		float freq = m_frequency;
+		FN_DECIMAL amp = m_positionWarpAmp * m_fractalBounding;
+		FN_DECIMAL freq = m_frequency;
 
 		SinglePositionWarp(m_perm[0], amp, m_frequency, ref x, ref y, ref z);
 
@@ -1925,11 +1971,11 @@ public class FastNoise
 		}
 	}
 
-	private void SinglePositionWarp(byte offset, float warpAmp, float frequency, ref float x, ref float y, ref float z)
+	private void SinglePositionWarp(byte offset, FN_DECIMAL warpAmp, FN_DECIMAL frequency, ref FN_DECIMAL x, ref FN_DECIMAL y, ref FN_DECIMAL z)
 	{
-		float xf = x * frequency;
-		float yf = y * frequency;
-		float zf = z * frequency;
+		FN_DECIMAL xf = x * frequency;
+		FN_DECIMAL yf = y * frequency;
+		FN_DECIMAL zf = z * frequency;
 
 		int x0 = FastFloor(xf);
 		int y0 = FastFloor(yf);
@@ -1938,7 +1984,7 @@ public class FastNoise
 		int y1 = y0 + 1;
 		int z1 = z0 + 1;
 
-		float xs, ys, zs;
+		FN_DECIMAL xs, ys, zs;
 		switch (m_interp)
 		{
 			default:
@@ -1962,20 +2008,20 @@ public class FastNoise
 		int lutPos0 = Index3D_256(offset, x0, y0, z0);
 		int lutPos1 = Index3D_256(offset, x1, y0, z0);
 
-		float lx0x = Lerp(CELL_3D_X[lutPos0], CELL_3D_X[lutPos1], xs);
-		float ly0x = Lerp(CELL_3D_Y[lutPos0], CELL_3D_Y[lutPos1], xs);
-		float lz0x = Lerp(CELL_3D_Z[lutPos0], CELL_3D_Z[lutPos1], xs);
+		FN_DECIMAL lx0x = Lerp(CELL_3D_X[lutPos0], CELL_3D_X[lutPos1], xs);
+		FN_DECIMAL ly0x = Lerp(CELL_3D_Y[lutPos0], CELL_3D_Y[lutPos1], xs);
+		FN_DECIMAL lz0x = Lerp(CELL_3D_Z[lutPos0], CELL_3D_Z[lutPos1], xs);
 
 		lutPos0 = Index3D_256(offset, x0, y1, z0);
 		lutPos1 = Index3D_256(offset, x1, y1, z0);
 
-		float lx1x = Lerp(CELL_3D_X[lutPos0], CELL_3D_X[lutPos1], xs);
-		float ly1x = Lerp(CELL_3D_Y[lutPos0], CELL_3D_Y[lutPos1], xs);
-		float lz1x = Lerp(CELL_3D_Z[lutPos0], CELL_3D_Z[lutPos1], xs);
+		FN_DECIMAL lx1x = Lerp(CELL_3D_X[lutPos0], CELL_3D_X[lutPos1], xs);
+		FN_DECIMAL ly1x = Lerp(CELL_3D_Y[lutPos0], CELL_3D_Y[lutPos1], xs);
+		FN_DECIMAL lz1x = Lerp(CELL_3D_Z[lutPos0], CELL_3D_Z[lutPos1], xs);
 
-		float lx0y = Lerp(lx0x, lx1x, ys);
-		float ly0y = Lerp(ly0x, ly1x, ys);
-		float lz0y = Lerp(lz0x, lz1x, ys);
+		FN_DECIMAL lx0y = Lerp(lx0x, lx1x, ys);
+		FN_DECIMAL ly0y = Lerp(ly0x, ly1x, ys);
+		FN_DECIMAL lz0y = Lerp(lz0x, lz1x, ys);
 
 		lutPos0 = Index3D_256(offset, x0, y0, z1);
 		lutPos1 = Index3D_256(offset, x1, y0, z1);
@@ -1996,15 +2042,15 @@ public class FastNoise
 		z += Lerp(lz0y, Lerp(lz0x, lz1x, ys), zs) * warpAmp;
 	}
 
-	public void PositionWarp(ref float x, ref float y)
+	public void PositionWarp(ref FN_DECIMAL x, ref FN_DECIMAL y)
 	{
 		SinglePositionWarp(0, m_positionWarpAmp, m_frequency, ref x, ref y);
 	}
 
-	public void PositionWarpFractal(ref float x, ref float y)
+	public void PositionWarpFractal(ref FN_DECIMAL x, ref FN_DECIMAL y)
 	{
-		float amp = m_positionWarpAmp * m_fractalBounding;
-		float freq = m_frequency;
+		FN_DECIMAL amp = m_positionWarpAmp * m_fractalBounding;
+		FN_DECIMAL freq = m_frequency;
 
 		SinglePositionWarp(m_perm[0], amp, m_frequency, ref x, ref y);
 
@@ -2016,17 +2062,17 @@ public class FastNoise
 		}
 	}
 
-	private void SinglePositionWarp(byte offset, float warpAmp, float frequency, ref float x, ref float y)
+	private void SinglePositionWarp(byte offset, FN_DECIMAL warpAmp, FN_DECIMAL frequency, ref FN_DECIMAL x, ref FN_DECIMAL y)
 	{
-		float xf = x * frequency;
-		float yf = y * frequency;
+		FN_DECIMAL xf = x * frequency;
+		FN_DECIMAL yf = y * frequency;
 
 		int x0 = FastFloor(xf);
 		int y0 = FastFloor(yf);
 		int x1 = x0 + 1;
 		int y1 = y0 + 1;
 
-		float xs, ys;
+		FN_DECIMAL xs, ys;
 		switch (m_interp)
 		{
 			default:
@@ -2047,14 +2093,14 @@ public class FastNoise
 		int lutPos0 = Index2D_256(offset, x0, y0);
 		int lutPos1 = Index2D_256(offset, x1, y0);
 
-		float lx0x = Lerp(CELL_2D_X[lutPos0], CELL_2D_X[lutPos1], xs);
-		float ly0x = Lerp(CELL_2D_Y[lutPos0], CELL_2D_Y[lutPos1], xs);
+		FN_DECIMAL lx0x = Lerp(CELL_2D_X[lutPos0], CELL_2D_X[lutPos1], xs);
+		FN_DECIMAL ly0x = Lerp(CELL_2D_Y[lutPos0], CELL_2D_Y[lutPos1], xs);
 
 		lutPos0 = Index2D_256(offset, x0, y1);
 		lutPos1 = Index2D_256(offset, x1, y1);
 
-		float lx1x = Lerp(CELL_2D_X[lutPos0], CELL_2D_X[lutPos1], xs);
-		float ly1x = Lerp(CELL_2D_Y[lutPos0], CELL_2D_Y[lutPos1], xs);
+		FN_DECIMAL lx1x = Lerp(CELL_2D_X[lutPos0], CELL_2D_X[lutPos1], xs);
+		FN_DECIMAL ly1x = Lerp(CELL_2D_Y[lutPos0], CELL_2D_Y[lutPos1], xs);
 
 		x += Lerp(lx0x, lx1x, ys) * warpAmp;
 		y += Lerp(ly0x, ly1x, ys) * warpAmp;
