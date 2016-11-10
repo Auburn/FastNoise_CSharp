@@ -252,5 +252,10 @@ paket-files/
 *.sln.iml
 
 *.sln
-*.vcxproj
-*.vcxproj.filters
+*.csproj
+*.config
+/Properties
+Program.cs
+/LibNoise
+/FastNoiseOLD.cs
+/OpenSimplexNoise.cs
