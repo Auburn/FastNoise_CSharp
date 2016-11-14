@@ -849,7 +849,7 @@ public class FastNoise
 	}
 
 	// Gradient Noise
-	public FN_DECIMAL GetGradientFractal(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
+	public FN_DECIMAL GetPerlinFractal(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -925,7 +925,7 @@ public class FastNoise
 		return sum;
 	}
 
-	public FN_DECIMAL GetGradient(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
+	public FN_DECIMAL GetPerlin(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
 		return SinglePerlin(0, x * m_frequency, y * m_frequency, z * m_frequency);
 	}
@@ -978,7 +978,7 @@ public class FastNoise
 		return Lerp(yf0, yf1, zs);
 	}
 
-	public FN_DECIMAL GetGradientFractal(FN_DECIMAL x, FN_DECIMAL y)
+	public FN_DECIMAL GetPerlinFractal(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		x *= m_frequency;
 		y *= m_frequency;
@@ -1050,7 +1050,7 @@ public class FastNoise
 		return sum;
 	}
 
-	public FN_DECIMAL GetGradient(FN_DECIMAL x, FN_DECIMAL y)
+	public FN_DECIMAL GetPerlin(FN_DECIMAL x, FN_DECIMAL y)
 	{
 		return SinglePerlin(0, x * m_frequency, y * m_frequency);
 	}
