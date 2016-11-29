@@ -437,7 +437,7 @@ public class FastNoise
 		switch (m_noiseType)
 		{
 			case NoiseType.Value:
-				return SingleValue(0, x, y, z);
+				return SingleValue(m_seed, x, y, z);
 			case NoiseType.ValueFractal:
 				switch (m_fractalType)
 				{
@@ -451,7 +451,7 @@ public class FastNoise
 						return 0.0f;
 				}
 			case NoiseType.Perlin:
-				return SinglePerlin(0, x, y, z);
+				return SinglePerlin(m_seed, x, y, z);
 			case NoiseType.PerlinFractal:
 				switch (m_fractalType)
 				{
@@ -465,7 +465,7 @@ public class FastNoise
 						return 0.0f;
 				}
 			case NoiseType.Simplex:
-				return SingleSimplex(0, x, y, z);
+				return SingleSimplex(m_seed, x, y, z);
 			case NoiseType.SimplexFractal:
 				switch (m_fractalType)
 				{
@@ -503,7 +503,7 @@ public class FastNoise
 		switch (m_noiseType)
 		{
 			case NoiseType.Value:
-				return SingleValue(0, x, y);
+				return SingleValue(m_seed, x, y);
 			case NoiseType.ValueFractal:
 				switch (m_fractalType)
 				{
@@ -517,7 +517,7 @@ public class FastNoise
 						return 0.0f;
 				}
 			case NoiseType.Perlin:
-				return SinglePerlin(0, x, y);
+				return SinglePerlin(m_seed, x, y);
 			case NoiseType.PerlinFractal:
 				switch (m_fractalType)
 				{
@@ -531,7 +531,7 @@ public class FastNoise
 						return 0.0f;
 				}
 			case NoiseType.Simplex:
-				return SingleSimplex(0, x, y);
+				return SingleSimplex(m_seed, x, y);
 			case NoiseType.SimplexFractal:
 				switch (m_fractalType)
 				{
@@ -697,7 +697,7 @@ public class FastNoise
 
 	public FN_DECIMAL GetValue(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		return SingleValue(0, x * m_frequency, y * m_frequency, z * m_frequency);
+		return SingleValue(m_seed, x * m_frequency, y * m_frequency, z * m_frequency);
 	}
 
 	private FN_DECIMAL SingleValue(int seed, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
@@ -814,7 +814,7 @@ public class FastNoise
 
 	public FN_DECIMAL GetValue(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		return SingleValue(0, x * m_frequency, y * m_frequency);
+		return SingleValue(m_seed, x * m_frequency, y * m_frequency);
 	}
 
 	private FN_DECIMAL SingleValue(int seed, FN_DECIMAL x, FN_DECIMAL y)
@@ -927,7 +927,7 @@ public class FastNoise
 
 	public FN_DECIMAL GetPerlin(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		return SinglePerlin(0, x * m_frequency, y * m_frequency, z * m_frequency);
+		return SinglePerlin(m_seed, x * m_frequency, y * m_frequency, z * m_frequency);
 	}
 
 	private FN_DECIMAL SinglePerlin(int seed, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
@@ -1052,7 +1052,7 @@ public class FastNoise
 
 	public FN_DECIMAL GetPerlin(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		return SinglePerlin(0, x * m_frequency, y * m_frequency);
+		return SinglePerlin(m_seed, x * m_frequency, y * m_frequency);
 	}
 
 	private FN_DECIMAL SinglePerlin(int seed, FN_DECIMAL x, FN_DECIMAL y)
@@ -1170,7 +1170,7 @@ public class FastNoise
 
 	public FN_DECIMAL GetSimplex(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 	{
-		return SingleSimplex(0, x * m_frequency, y * m_frequency, z * m_frequency);
+		return SingleSimplex(m_seed, x * m_frequency, y * m_frequency, z * m_frequency);
 	}
 
 	private const FN_DECIMAL F3 = (FN_DECIMAL)(1.0 / 3.0);
@@ -1347,7 +1347,7 @@ public class FastNoise
 
 	public FN_DECIMAL GetSimplex(FN_DECIMAL x, FN_DECIMAL y)
 	{
-		return SingleSimplex(0, x * m_frequency, y * m_frequency);
+		return SingleSimplex(m_seed, x * m_frequency, y * m_frequency);
 	}
 
 	private const FN_DECIMAL F2 = (FN_DECIMAL)(1.0 / 2.0);
@@ -1412,7 +1412,7 @@ public class FastNoise
 
 	public FN_DECIMAL GetSimplex(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, FN_DECIMAL w)
 	{
-		return SingleSimplex(0, x * m_frequency, y * m_frequency, z * m_frequency, w * m_frequency);
+		return SingleSimplex(m_seed, x * m_frequency, y * m_frequency, z * m_frequency, w * m_frequency);
 	}
 
 	private static readonly byte[] SIMPLEX_4D =
