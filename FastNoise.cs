@@ -1935,7 +1935,7 @@ public class FastNoise
 
 	public void GradientPerturb(ref FN_DECIMAL x, ref FN_DECIMAL y, ref FN_DECIMAL z)
 	{
-		SingleGradientPerturb(0, m_gradientPerturbAmp, m_frequency, ref x, ref y, ref z);
+		SingleGradientPerturb(m_seed, m_gradientPerturbAmp, m_frequency, ref x, ref y, ref z);
 	}
 
 	public void GradientPerturbFractal(ref FN_DECIMAL x, ref FN_DECIMAL y, ref FN_DECIMAL z)
@@ -2027,7 +2027,7 @@ public class FastNoise
 
 	public void GradientPerturb(ref FN_DECIMAL x, ref FN_DECIMAL y)
 	{
-		SingleGradientPerturb(0, m_gradientPerturbAmp, m_frequency, ref x, ref y);
+		SingleGradientPerturb(m_seed, m_gradientPerturbAmp, m_frequency, ref x, ref y);
 	}
 
 	public void GradientPerturbFractal(ref FN_DECIMAL x, ref FN_DECIMAL y)
