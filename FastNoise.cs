@@ -380,8 +380,11 @@ public class FastNoise
 		if ((hash & 4) == 0)
 			return ((hash & 1) != 0 ? xd : -xd) + ((hash & 2) != 0 ? yd : -yd);
 
-		return ((hash & 1) != 0 ? xd : yd) * ((hash & 2) != 0 ? 1 : -1);
-	}
+		if ((hash & 2) == 0)
+			return ((hash & 1) != 0 ? -xd : -yd);
+		
+		return ((hash & 1) != 0 ? xd : yd);
+	}	
 
 #if !FN_DISABLE_AGGRESSIVE_INLINING
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -395,10 +398,11 @@ public class FastNoise
 
 		hash = hash * hash * hash * 60493;
 		hash = (hash >> 13) ^ hash;
-
+		
 		hash &= 15;
 		FN_DECIMAL u = hash < 8 ? xd : yd; // gradient directions, and compute dot product.
 		FN_DECIMAL v = hash < 4 ? yd : hash == 12 || hash == 14 ? xd : zd; // Fix repeats at h = 12 to 15
+
 		return ((hash & 1) != 0 ? -u : u) + ((hash & 2) != 0 ? -v : v);
 	}
 
