@@ -399,9 +399,10 @@ public class FastNoise
 		hash = hash * hash * hash * 60493;
 		hash = (hash >> 13) ^ hash;
 		
-		hash &= 15;
-		FN_DECIMAL u = hash < 8 ? xd : yd; // gradient directions, and compute dot product.
-		FN_DECIMAL v = hash < 4 ? yd : hash == 12 || hash == 14 ? xd : zd; // Fix repeats at h = 12 to 15
+		int hasha13 = hash & 13;
+
+		FN_DECIMAL u = hasha13 < 8 ? xd : yd; // gradient directions, and compute dot product.
+		FN_DECIMAL v = hasha13 < 2 ? yd : hasha13 == 12 ? xd : zd; // Fix repeats at h = 12 to 15
 
 		return ((hash & 1) != 0 ? -u : u) + ((hash & 2) != 0 ? -v : v);
 	}
