@@ -16,6 +16,7 @@ I have now also created [FastNoise SIMD](https://github.com/Auburns/FastNoiseSIM
 - Multiple fractal options for all of the above
 - Cellular (Voronoi) Noise 2D, 3D
 - White Noise 2D, 3D, 4D
+- Supports floats or doubles
 
 ### Wiki
 Usage and documentation available in wiki
@@ -25,6 +26,7 @@ Usage and documentation available in wiki
 ### Related repositories
  - [FastNoise](https://github.com/Auburns/FastNoise)
  - [FastNoise SIMD](https://github.com/Auburns/FastNoiseSIMD)
+ - [FastNoise Unity](https://www.assetstore.unity3d.com/en/#!/content/70706)
  - [Unreal FastNoise](https://github.com/midgen/UnrealFastNoise)
 
 ## FastNoise Preview
@@ -36,7 +38,7 @@ Download links can be found in the [FastNoise Releases Section](https://github.c
 ![FastNoise Preview](http://i.imgur.com/uG7Vepc.png)
 
 
-#Performance Comparisons
+# Performance Comparisons
 These are performance stats from the original C++ version of FastNoise
 
 Using default noise settings on FastNoise and matching those settings across the other libraries where possible.
@@ -57,24 +59,24 @@ Timing are averages of time taken for 1 million iterations on a single thread.
 | White Noise      | 2.81      | 0.47                  |          |          |
 | Cellular         | 122.21    | 31.42                 | 1,122.60 | 2,473.06 |
 
-#Examples
-##Cellular Noise
+# Examples
+## Cellular Noise
 ![Cellular Noise](http://i.imgur.com/quAic8M.png)
 
 ![Cellular Noise](http://i.imgur.com/gAd9Y2t.png)
 
 ![Cellular Noise](http://i.imgur.com/7kJd4fA.png)
 
-##Fractal Noise
+## Fractal Noise
 ![Fractal Noise](http://i.imgur.com/XqSD7eR.png)
 
-##Value Noise
+## Value Noise
 ![Value Noise](http://i.imgur.com/X2lbFZR.png)
 
-##White Noise
+## White Noise
 ![White Noise](http://i.imgur.com/QIlYvyQ.png)
 
-##Position Warpring
+## Position Warpring
 ![Position Warpring](http://i.imgur.com/gOjc1u1.png)
 
 ![Position Warpring](http://i.imgur.com/ui045Bk.png)
