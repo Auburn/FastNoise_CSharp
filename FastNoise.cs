@@ -26,20 +26,8 @@
 // off every 'zix'.)
 //
 
-
-// COMPILE SETTINGS
-
 // Uncomment the line below to swap all the inputs/outputs of FastNoise to doubles instead of floats
-//#define FN_USE_DOUBLES
-
-// Uncomment the line below to disable the method aggressive inlining attribute, do this if it is unsupported, ie Unity
-//#define FN_DISABLE_AGGRESSIVE_INLINING
-
-// ----------------
-
-#if UNITY_3 || UNITY_4 || UNITY_5
-#define FN_DISABLE_AGGRESSIVE_INLINING
-#endif
+#define FN_USE_DOUBLES
 
 #if FN_USE_DOUBLES
 using FN_DECIMAL = System.Double;
@@ -52,6 +40,8 @@ using System.Runtime.CompilerServices;
 
 public class FastNoise
 {
+	private const Int16 FN_INLINE = 256; //(Int16)MethodImplOptions.AggressiveInlining;
+
 	public enum NoiseType { Value, ValueFractal, Perlin, PerlinFractal, Simplex, SimplexFractal, Cellular, WhiteNoise };
 	public enum Interp { Linear, Hermite, Quintic };
 	public enum FractalType { FBM, Billow, RigidMulti };
@@ -81,6 +71,9 @@ public class FastNoise
 		m_seed = seed;
 		CalculateFractalBounding();
 	}
+
+	// Returns a 0 float/double
+	public static FN_DECIMAL GetDecimalType() { return 0; }
 
 	// Returns the seed used by this object
 	public int GetSeed() { return m_seed; }
@@ -244,29 +237,19 @@ public class FastNoise
 		new Float3(0.3450735512f, 0.08611519592f, 0.2756962409f), new Float3(0.1814473292f, -0.2788782453f, -0.3029914042f), new Float3(-0.03855010448f, 0.09795110726f, 0.4375151083f), new Float3(0.3533670318f, 0.2665752752f, 0.08105160988f), new Float3(-0.007945601311f, 0.140359426f, -0.4274764309f), new Float3(0.4063099273f, -0.1491768253f, -0.1231199324f), new Float3(-0.2016773589f, 0.008816271194f, -0.4021797064f), new Float3(-0.07527055435f, -0.425643481f, -0.1251477955f),
 	};
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static int FastFloor(FN_DECIMAL f) { return (f >= 0 ? (int)f : (int)f - 1); }
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static int FastRound(FN_DECIMAL f) { return (f >= 0) ? (int)(f + (FN_DECIMAL)0.5) : (int)(f - (FN_DECIMAL)0.5); }
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static FN_DECIMAL Lerp(FN_DECIMAL a, FN_DECIMAL b, FN_DECIMAL t) { return a + t * (b - a); }
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static FN_DECIMAL InterpHermiteFunc(FN_DECIMAL t) { return t * t * (3 - 2 * t); }
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static FN_DECIMAL InterpQuinticFunc(FN_DECIMAL t) { return t * t * t * (t * (t * 6 - 15) + 10); }
 
 	private void CalculateFractalBounding()
@@ -287,9 +270,7 @@ public class FastNoise
 	private const int Z_PRIME = 6971;
 	private const int W_PRIME = 1013;
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static int Hash2D(int seed, int x, int y)
 	{
 		int hash = seed;
@@ -302,9 +283,7 @@ public class FastNoise
 		return hash;
 	}
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static int Hash3D(int seed, int x, int y, int z)
 	{
 		int hash = seed;
@@ -318,9 +297,7 @@ public class FastNoise
 		return hash;
 	}
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static int Hash4D(int seed, int x, int y, int z, int w)
 	{
 		int hash = seed;
@@ -335,9 +312,7 @@ public class FastNoise
 		return hash;
 	}
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static FN_DECIMAL ValCoord2D(int seed, int x, int y)
 	{
 		int n = seed;
@@ -347,9 +322,7 @@ public class FastNoise
 		return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
 	}
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static FN_DECIMAL ValCoord3D(int seed, int x, int y, int z)
 	{
 		int n = seed;
@@ -360,9 +333,7 @@ public class FastNoise
 		return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
 	}
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static FN_DECIMAL ValCoord4D(int seed, int x, int y, int z, int w)
 	{
 		int n = seed;
@@ -374,9 +345,7 @@ public class FastNoise
 		return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
 	}
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static FN_DECIMAL GradCoord2D(int seed, int x, int y, FN_DECIMAL xd, FN_DECIMAL yd)
 	{
 		int hash = seed;
@@ -391,9 +360,7 @@ public class FastNoise
 		return xd * g.x + yd * g.y;
 	}
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static FN_DECIMAL GradCoord3D(int seed, int x, int y, int z, FN_DECIMAL xd, FN_DECIMAL yd, FN_DECIMAL zd)
 	{
 		int hash = seed;
@@ -409,9 +376,7 @@ public class FastNoise
 		return xd * g.x + yd * g.y + zd * g.z;
 	}
 
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private static FN_DECIMAL GradCoord4D(int seed, int x, int y, int z, int w, FN_DECIMAL xd, FN_DECIMAL yd, FN_DECIMAL zd, FN_DECIMAL wd)
 	{
 		int hash = seed;
@@ -568,9 +533,7 @@ public class FastNoise
 	}
 
 	// White Noise
-#if !FN_DISABLE_AGGRESSIVE_INLINING
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+	[MethodImplAttribute(FN_INLINE)]
 	private int FloatCast2Int(FN_DECIMAL f)
 	{
 		var i = BitConverter.DoubleToInt64Bits(f);
