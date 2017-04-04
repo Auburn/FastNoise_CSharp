@@ -568,9 +568,14 @@ public class FastNoise
 	}
 
 	// White Noise
+#if !FN_DISABLE_AGGRESSIVE_INLINING
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
 	private int FloatCast2Int(FN_DECIMAL f)
 	{
-		return BitConverter.ToInt32(BitConverter.GetBytes(f), 0);
+		var i = BitConverter.DoubleToInt64Bits(f);
+
+		return (int)(i ^ (i >> 32));
 	}
 
 	public FN_DECIMAL GetWhiteNoise(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, FN_DECIMAL w)
@@ -580,11 +585,7 @@ public class FastNoise
 		int zi = FloatCast2Int(z);
 		int wi = FloatCast2Int(w);
 
-		return ValCoord4D(m_seed,
-			xi ^ (xi >> 16),
-			yi ^ (yi >> 16),
-			zi ^ (zi >> 16),
-			wi ^ (wi >> 16));
+		return ValCoord4D(m_seed, xi, yi, zi, wi);
 	}
 
 	public FN_DECIMAL GetWhiteNoise(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
@@ -593,10 +594,7 @@ public class FastNoise
 		int yi = FloatCast2Int(y);
 		int zi = FloatCast2Int(z);
 
-		return ValCoord3D(m_seed,
-			xi ^ (xi >> 16),
-			yi ^ (yi >> 16),
-			zi ^ (zi >> 16));
+		return ValCoord3D(m_seed, xi, yi, zi);
 	}
 
 	public FN_DECIMAL GetWhiteNoise(FN_DECIMAL x, FN_DECIMAL y)
@@ -604,9 +602,7 @@ public class FastNoise
 		int xi = FloatCast2Int(x);
 		int yi = FloatCast2Int(y);
 
-		return ValCoord2D(m_seed,
-			xi ^ (xi >> 16),
-			yi ^ (yi >> 16));
+		return ValCoord2D(m_seed, xi, yi);
 	}
 
 	public FN_DECIMAL GetWhiteNoiseInt(int x, int y, int z, int w)
