@@ -1372,8 +1372,12 @@ public class FastNoise
 		return SingleSimplex(m_seed, x * m_frequency, y * m_frequency);
 	}
 
-	private const FN_DECIMAL F2 = (FN_DECIMAL)(1.0 / 2.0);
-	private const FN_DECIMAL G2 = (FN_DECIMAL)(1.0 / 4.0);
+	//private const FN_DECIMAL F2 = (FN_DECIMAL)(1.0 / 2.0);
+	//private const FN_DECIMAL G2 = (FN_DECIMAL)(1.0 / 4.0);
+	
+	private const FN_DECIMAL SQRT3 = (FN_DECIMAL)1.7320508075688772935274463415059;
+	private const FN_DECIMAL F2 = (FN_DECIMAL)0.5 * (SQRT3 - (FN_DECIMAL)1.0);
+	private const FN_DECIMAL G2 = ((FN_DECIMAL)3.0 - SQRT3) / (FN_DECIMAL)6.0;
 
 	private FN_DECIMAL SingleSimplex(int seed, FN_DECIMAL x, FN_DECIMAL y)
 	{
@@ -1400,8 +1404,8 @@ public class FastNoise
 
 		FN_DECIMAL x1 = x0 - i1 + G2;
 		FN_DECIMAL y1 = y0 - j1 + G2;
-		FN_DECIMAL x2 = x0 - 1 + F2;
-		FN_DECIMAL y2 = y0 - 1 + F2;
+		FN_DECIMAL x2 = x0 - 1 + 2*G2;
+		FN_DECIMAL y2 = y0 - 1 + 2*G2;
 
 		FN_DECIMAL n0, n1, n2;
 
