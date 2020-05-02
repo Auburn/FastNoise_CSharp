@@ -40,7 +40,6 @@ using System;
 using System.Runtime.CompilerServices;
 
 
-namespace FastNoise {
 	public partial class FastNoise {
 		private const Int16 FN_INLINE = 256; //(Int16)MethodImplOptions.AggressiveInlining;
 		private const int FN_CELLULAR_INDEX_MAX = 3;
