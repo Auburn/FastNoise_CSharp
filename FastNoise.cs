@@ -1767,7 +1767,7 @@ public class FastNoise
 		x *= m_frequency;
 		y *= m_frequency;
 
-		return SingleCubic(0, x, y);
+		return SingleCubic(m_seed, x, y);
 	}
 
 	private const FN_DECIMAL CUBIC_2D_BOUNDING = 1 / (FN_DECIMAL)(1.5 * 1.5);
