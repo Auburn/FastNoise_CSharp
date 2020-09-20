@@ -1,7 +1,7 @@
 [![discord](https://img.shields.io/discord/703636892901441577?style=flat-square&logo=discord "Discord")](https://discord.gg/SHVaVfV)
 
 ### Depreciated 
-This version of FastNoise is now depreciated, please look into using [FastNoise Lite](https://github.com/Auburn/FastNoise/) which is the succesor to this library.
+This version of FastNoise is now depreciated, please look into using [FastNoise Lite](https://github.com/Auburn/FastNoise/) which is the successor to this library.
 
 # FastNoise
 
